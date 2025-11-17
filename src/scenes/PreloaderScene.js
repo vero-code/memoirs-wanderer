@@ -19,10 +19,17 @@ export default class PreloaderScene extends Phaser.Scene {
     });
 
     this.load.on("complete", () => {
+      const enData = this.cache.json.get('locale_en');
+      this.registry.set('locale_data', enData);
+      this.registry.set('current_lang', 'en');
+
       loadingBar.destroy();
       a.destroy();
 
       this.scene.start("GameScene");
     });
+
+    this.load.json('locale_en', 'locales/en.json');
+    this.load.json('locale_ru', 'locales/ru.json');
   }
 }
