@@ -5,6 +5,7 @@ export default class GameScene extends Phaser.Scene {
   map;
   player;
   layers = {};
+  cursors;
 
   constructor() {
     super("GameScene");
@@ -13,10 +14,21 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.map = this.make.tilemap({ key: "map_dungeon" });
     const tileset = this.map.addTilesetImage("tileset", "tiles_dungeon");
+
     this.layers.ground = this.map.createLayer("Dungeon", tileset, 0, 0);
+    this.layers.ground.setDepth(0);
+
     this.layers.objects = this.map.createLayer("Objects", tileset, 0, 0);
-    this.player = this.physics.add.sprite(100, 100, "player_sheet", 84);
+    this.layers.objects.setDepth(1);
+
+    this.layers.carts = this.map.createLayer("Carts", tileset, 0, 0);
+    this.layers.carts.setDepth(3);
+
+    this.player = this.physics.add.sprite(110, 150, "player_sheet", 112);
+    this.player.setDepth(2);
+
     this.cursors = this.input.keyboard.createCursorKeys();
+
     const camera = this.cameras.main;
     camera.startFollow(this.player);
     camera.setZoom(2);
@@ -28,6 +40,14 @@ export default class GameScene extends Phaser.Scene {
       this.map.heightInPixels
     );
     this.player.setCollideWorldBounds(true);
+
+    this.layers.ground.setCollisionByProperty({ collides: true });
+    this.layers.objects.setCollisionByProperty({ collides: true });
+    this.layers.carts.setCollisionByProperty({ collides: true });
+
+    this.physics.add.collider(this.player, this.layers.ground);
+    this.physics.add.collider(this.player, this.layers.objects);
+    this.physics.add.collider(this.player, this.layers.carts);
   }
 
   update(time, delta) {

@@ -44,6 +44,7 @@ export default class PreloaderScene extends Phaser.Scene {
       {
         frameWidth: 16,
         frameHeight: 16,
+        spacing: 1
       }
     );
   }
