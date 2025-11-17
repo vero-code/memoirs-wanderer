@@ -19,9 +19,9 @@ export default class PreloaderScene extends Phaser.Scene {
     });
 
     this.load.on("complete", () => {
-      const enData = this.cache.json.get('locale_en');
-      this.registry.set('locale_data', enData);
-      this.registry.set('current_lang', 'en');
+      const enData = this.cache.json.get("locale_en");
+      this.registry.set("locale_data", enData);
+      this.registry.set("current_lang", "en");
 
       loadingBar.destroy();
       a.destroy();
@@ -29,7 +29,22 @@ export default class PreloaderScene extends Phaser.Scene {
       this.scene.start("GameScene");
     });
 
-    this.load.json('locale_en', 'locales/en.json');
-    this.load.json('locale_ru', 'locales/ru.json');
+    this.load.json("locale_en", "locales/en.json");
+    this.load.json("locale_ru", "locales/ru.json");
+
+    this.load.image("tiles_dungeon", "assets/tilesets/tiny_dungeon_tiles.png");
+    this.load.tilemapTiledJSON(
+      "map_dungeon",
+      "assets/tilesets/dungeon_map.json"
+    );
+
+    this.load.spritesheet(
+      "player_sheet",
+      "assets/tilesets/tiny_dungeon_tiles.png",
+      {
+        frameWidth: 16,
+        frameHeight: 16,
+      }
+    );
   }
 }
