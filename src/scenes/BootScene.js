@@ -6,12 +6,11 @@ export default class BootScene extends Phaser.Scene {
     super("BootScene");
   }
 
+  // preload() {
+        // shown during the Preloader
+    // }
+
   create() {
-    this.add
-      .text(400, 300, "Hello, Wanderer! (from Vite)", {
-        fontSize: "32px",
-        color: "#ffffff",
-      })
-      .setOrigin(0.5);
+    this.scene.start('PreloaderScene');
   }
 }
