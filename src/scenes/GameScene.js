@@ -9,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
   cursors;
 
   hasDiary = false;
-  dialogText;
+  justGotDiary = false;
 
   constructor() {
     super("GameScene");
@@ -68,16 +68,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, this.writer);
 
-    this.dialogText = this.add.text(10, 220, "", {
-      fontSize: "10px",
-      fill: "#ffffff",
-      backgroundColor: "#000000",
-      padding: { x: 5, y: 5 },
-      wordWrap: { width: 300 },
-    });
-    this.dialogText.setScrollFactor(0);
-    this.dialogText.setDepth(100);
-    this.dialogText.setVisible(false);
+    this.scene.launch("UIScene");
   }
 
   update(time, delta) {
@@ -99,24 +90,27 @@ export default class GameScene extends Phaser.Scene {
     this.player.body.velocity.normalize().scale(speed);
 
     const dist = Phaser.Math.Distance.Between(
-      this.player.x,
-      this.player.y,
-      this.writer.x,
-      this.writer.y
+      this.player.x, this.player.y,
+      this.writer.x, this.writer.y
     );
 
     if (dist < 30) {
-      this.dialogText.setVisible(true);
-      if (this.hasDiary) {
-         this.dialogText.setText('Writer: "Good luck! Don\'t forget to write."');
-      } else {
-         this.dialogText.setText('Writer: "Hello! Take this diary..."');
-      }
-    } else {
-      this.dialogText.setVisible(false);
-      if (dist > 30 && dist < 40 && !this.hasDiary) {
+      if (!this.hasDiary) {
           this.hasDiary = true;
+          this.justGotDiary = true;
           console.log("Diary received.");
+      }
+      let text = "";
+      if (this.justGotDiary) {
+         text = 'Writer: "Hello! Take this diary..."';
+      } else {
+         text = 'Writer: "Good luck! Don\'t forget to write."';
+      }
+      this.events.emit("show-dialog", text);
+    } else {
+      this.events.emit("hide-dialog");
+      if (this.justGotDiary) {
+          this.justGotDiary = false;
       }
     }
   }
