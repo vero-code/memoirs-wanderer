@@ -6,12 +6,14 @@ export default class UIScene extends Phaser.Scene {
   diaryIcon;
   armorIcon;
   potatoIcon;
+  darknessOverlay;
 
   constructor() {
     super("UIScene");
   }
 
   create() {
+    // Dialog text
     this.dialogText = this.add
       .text(400, 550, "", {
         fontSize: "20px",
@@ -23,35 +25,20 @@ export default class UIScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     this.dialogText.setVisible(false);
+    this.dialogText.setDepth(100);
 
-    this.diaryIcon = this.add.text(650, 20, "📔 Diary", {
-      fontSize: "20px",
-      fill: "#FFFF00",
-      backgroundColor: "#000000aa",
-      padding: { x: 8, y: 4 },
-    });
-    this.diaryIcon.setVisible(false);
-    this.diaryIcon.setAlpha(1);
-    this.diaryIcon.setScrollFactor(0);
+    // Icons
+    this.diaryIcon = this.createIcon(650, "📔 Diary", "#FFFF00");
+    this.armorIcon = this.createIcon(510, "🛡️ Armor", "#00FFFF");
+    this.potatoIcon = this.createIcon(370, "🥔 Potato", "#FFA500");
 
-    this.armorIcon = this.add.text(510, 20, "🛡️ Armor", {
-      fontSize: "20px",
-      fill: "#00FFFF",
-      backgroundColor: "#000000aa",
-      padding: { x: 10, y: 5 },
-    });
-    this.armorIcon.setVisible(false);
-    this.armorIcon.setAlpha(1);
+    // Darkness overlay
+    this.darknessOverlay = this.add.rectangle(0, 0, 800, 600, 0x000022); // Dark blue tint
+    this.darknessOverlay.setOrigin(0, 0);
+    this.darknessOverlay.setAlpha(0);
+    this.darknessOverlay.setDepth(-1);
 
-    this.potatoIcon = this.add.text(370, 20, "🥔 Potato", {
-      fontSize: "20px",
-      fill: "#FFA500",
-      backgroundColor: "#000000aa",
-      padding: { x: 10, y: 5 },
-    });
-    this.potatoIcon.setVisible(false);
-    this.potatoIcon.setAlpha(1);
-
+    // Events
     const gameScene = this.scene.get("GameScene");
 
     gameScene.events.on("show-dialog", (text) => {
@@ -63,24 +50,39 @@ export default class UIScene extends Phaser.Scene {
       this.dialogText.setVisible(false);
     });
 
-    gameScene.events.on("get-diary", () => {
-      this.diaryIcon.setVisible(true);
-      this.diaryIcon.setAlpha(1);
-      this.pulseIcon(this.diaryIcon);
-    });
+    gameScene.events.on("get-diary", () => this.pulseIcon(this.diaryIcon));
+    gameScene.events.on("get-armor", () => this.pulseIcon(this.armorIcon));
+    gameScene.events.on("get-potato", () => this.pulseIcon(this.potatoIcon));
 
-    gameScene.events.on("get-armor", () => {
-      this.armorIcon.setVisible(true);
-      this.pulseIcon(this.armorIcon);
-    });
+    gameScene.events.on("set-time", (time) => {
+        let targetAlpha = 0;
+        if (time === 'dusk') targetAlpha = 0.3;   // Evening
+        if (time === 'night') targetAlpha = 0.7;
 
-    gameScene.events.on("get-potato", () => {
-      this.potatoIcon.setVisible(true);
-      this.pulseIcon(this.potatoIcon);
+        // Smooth transition
+        this.tweens.add({
+            targets: this.darknessOverlay,
+            alpha: targetAlpha,
+            duration: 2000 
+        });
     });
   }
 
+  createIcon(x, text, color) {
+      const icon = this.add.text(x, 20, text, {
+        fontSize: "20px",
+        fill: color,
+        backgroundColor: "#000000aa",
+        padding: { x: 10, y: 5 },
+      });
+      icon.setVisible(false);
+      icon.setAlpha(1);
+      icon.setDepth(10); 
+      return icon;
+  }
+
   pulseIcon(target) {
+    target.setVisible(true);
     this.tweens.add({
       targets: target,
       alpha: 0.2,
