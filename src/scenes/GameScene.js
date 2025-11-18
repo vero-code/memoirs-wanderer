@@ -27,7 +27,16 @@ export default class GameScene extends Phaser.Scene {
     this.player = this.physics.add.sprite(110, 150, "player_sheet", 112);
     this.player.setDepth(2);
 
-    this.cursors = this.input.keyboard.createCursorKeys();
+    this.cursors = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.UP,
+      down: Phaser.Input.Keyboard.KeyCodes.DOWN,
+      left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+      right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
+      W: Phaser.Input.Keyboard.KeyCodes.W,
+      A: Phaser.Input.Keyboard.KeyCodes.A,
+      S: Phaser.Input.Keyboard.KeyCodes.S,
+      D: Phaser.Input.Keyboard.KeyCodes.D,
+    });
 
     const camera = this.cameras.main;
     camera.startFollow(this.player);
@@ -53,15 +62,17 @@ export default class GameScene extends Phaser.Scene {
   update(time, delta) {
     this.player.setVelocity(0);
     const speed = 100;
-    if (this.cursors.left.isDown) {
+    if (this.cursors.left.isDown || this.cursors.A.isDown) {
       this.player.setVelocityX(-speed);
-    } else if (this.cursors.right.isDown) {
+      this.player.setFlipX(true);
+    } else if (this.cursors.right.isDown || this.cursors.D.isDown) {
       this.player.setVelocityX(speed);
+      this.player.setFlipX(false);
     }
 
-    if (this.cursors.up.isDown) {
+    if (this.cursors.up.isDown || this.cursors.W.isDown) {
       this.player.setVelocityY(-speed);
-    } else if (this.cursors.down.isDown) {
+    } else if (this.cursors.down.isDown || this.cursors.S.isDown) {
       this.player.setVelocityY(speed);
     }
     this.player.body.velocity.normalize().scale(speed);
