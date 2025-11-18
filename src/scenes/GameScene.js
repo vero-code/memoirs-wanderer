@@ -1,6 +1,7 @@
 // src/scenes/GameScene.js
 import Phaser from "phaser";
 import Player from "../entities/Player.js";
+import Enemy from "../entities/Enemy.js";
 
 export default class GameScene extends Phaser.Scene {
   map;
@@ -8,15 +9,15 @@ export default class GameScene extends Phaser.Scene {
   writer;
   armorer;
   merchant;
+  enemies;
   layers = {};
 
+  // Quests
   hasDiary = false;
-  justGotDiary = false;
-
   hasArmor = false;
-  justGotArmor = false;
-
   hasPotato = false;
+  justGotDiary = false;
+  justGotArmor = false;
   justGotPotato = false;
 
   activeNPC = null;
@@ -38,6 +39,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.player = new Player(this, 110, 150, "player_sheet", 112);
 
+    // NPC
     this.writer = this.physics.add.sprite(60, 290, "player_sheet", 99);
     this.writer.setDepth(2);
     this.writer.setImmovable(true);
@@ -51,6 +53,14 @@ export default class GameScene extends Phaser.Scene {
     this.merchant.setDepth(2);
     this.merchant.setImmovable(true);
 
+    this.enemies = this.add.group();
+
+    const zombie1 = new Enemy(this, 200, 100, "player_sheet", 122, this.player);
+    this.enemies.add(zombie1);
+    const zombie2 = new Enemy(this, 100, 250, "player_sheet", 122, this.player);
+    this.enemies.add(zombie2);
+
+    // Camera and World
     const camera = this.cameras.main;
     camera.startFollow(this.player);
     camera.setZoom(2);
@@ -62,6 +72,7 @@ export default class GameScene extends Phaser.Scene {
       this.map.heightInPixels
     );
 
+    // Map Collisions
     this.layers.ground.setCollisionByProperty({ collides: true });
     this.layers.objects.setCollisionByProperty({ collides: true });
     this.layers.carts.setCollisionByProperty({ collides: true });
@@ -70,6 +81,15 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.layers.objects);
     this.physics.add.collider(this.player, this.layers.carts);
 
+    this.physics.add.collider(this.writer, this.layers.objects);
+
+    // Enemies Collisions
+    this.physics.add.collider(this.enemies, this.layers.ground);
+    this.physics.add.collider(this.enemies, this.layers.objects);
+    this.physics.add.collider(this.enemies, this.layers.carts);
+    this.physics.add.collider(this.player, this.enemies);
+
+    // NPC collisions
     this.physics.add.collider(this.player, this.writer);
     this.physics.add.collider(this.player, this.armorer);
     this.physics.add.collider(this.player, this.merchant);
@@ -79,6 +99,10 @@ export default class GameScene extends Phaser.Scene {
 
   update(time, delta) {
     this.player.update();
+
+    this.enemies.children.iterate((child) => {
+        if (child) child.update();
+    });
 
     const distWriter = Phaser.Math.Distance.Between(
       this.player.x, this.player.y,
