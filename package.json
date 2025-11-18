@@ -22,5 +22,8 @@
   "dependencies": {
     "phaser": "^3.90.0",
     "vite": "^7.2.2"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
   }
 }
