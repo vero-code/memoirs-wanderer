@@ -11,12 +11,16 @@ export default class UIScene extends Phaser.Scene {
   maxHealth = 3;
   currentHealth = 3;
 
+  gameScenes = ['GameScene', 'ForestScene'];
+
   constructor() {
     super('UIScene');
   }
 
   create() {
-    console.log('UIScene: STARTED');
+    this.hearts = [];
+    this.currentHealth = this.maxHealth;
+
     // Dialog text
     this.dialogText = this.add
       .text(400, 550, '', {
@@ -31,15 +35,7 @@ export default class UIScene extends Phaser.Scene {
     this.dialogText.setVisible(false);
     this.dialogText.setDepth(100);
 
-    console.log(`UIScene: Creating ${this.maxHealth} hearts...`);
-    for (let i = 0; i < this.maxHealth; i++) {
-      const heart = this.add.text(20 + i * 30, 20, '❤️', {
-        fontSize: '24px',
-      });
-      heart.setDepth(10);
-      this.hearts.push(heart);
-      console.log(`UIScene: Heart ${i} created at x=${20 + i * 30}`);
-    }
+    this.createHearts();
 
     // Icons
     this.diaryIcon = this.createIcon(650, '📔 Diary', '#FFFF00');
@@ -52,75 +48,116 @@ export default class UIScene extends Phaser.Scene {
     this.darknessOverlay.setAlpha(0);
     this.darknessOverlay.setDepth(-1);
 
-    // Events
-    const gameScene = this.scene.get('GameScene');
-
-    gameScene.events.on('show-dialog', (text) => {
-      this.dialogText.setText(text);
-      this.dialogText.setVisible(true);
-    });
-
-    gameScene.events.on('hide-dialog', () => {
-      this.dialogText.setVisible(false);
-    });
-
-    gameScene.events.on('get-diary', () => this.pulseIcon(this.diaryIcon));
-    gameScene.events.on('get-armor', () => this.pulseIcon(this.armorIcon));
-    gameScene.events.on('get-potato', () => this.pulseIcon(this.potatoIcon));
-
-    gameScene.events.on('set-time', (time) => {
-      let targetAlpha = 0;
-      if (time === 'dusk') targetAlpha = 0.3; // Evening
-      if (time === 'night') targetAlpha = 0.7;
-
-      // Smooth transition
-      this.tweens.add({
-        targets: this.darknessOverlay,
-        alpha: targetAlpha,
-        duration: 2000,
-      });
-    });
-
-    gameScene.events.on('player-hit', () => {
-      if (this.currentHealth > 0) {
-        this.currentHealth--;
-
-        const heartToRemove = this.hearts[this.currentHealth];
-        if (heartToRemove) {
-          this.tweens.add({
-            targets: heartToRemove,
-            alpha: 0,
-            scale: 0,
-            duration: 200,
-            onComplete: () => {
-              heartToRemove.destroy();
-            },
-          });
-        } else {
-          console.error(
-            `UIScene: Error! Heart visual not found for index ${this.currentHealth}`,
-          );
-        }
-
-        if (this.currentHealth <= 0) {
-          console.log('UIScene: GAME OVER TRIGGERED');
-
-          const gameOverText = this.add
-            .text(400, 300, 'YOU DIED\nPress F5 to Restart', {
-              fontSize: '64px',
-              fill: '#ff0000',
-              align: 'center',
-              backgroundColor: '#000000aa',
-            })
-            .setOrigin(0.5)
-            .setDepth(200);
-
-          gameScene.scene.pause();
-        }
-      } else {
-        console.log('UIScene: Health is already 0, ignoring hit');
+    this.gameScenes.forEach((sceneKey) => {
+      const scene = this.scene.get(sceneKey);
+      if (scene) {
+        scene.events.on('show-dialog', this.handleShowDialog, this);
+        scene.events.on('hide-dialog', this.handleHideDialog, this);
+        scene.events.on(
+          'get-diary',
+          () => this.pulseIcon(this.diaryIcon),
+          this,
+        );
+        scene.events.on(
+          'get-armor',
+          () => this.pulseIcon(this.armorIcon),
+          this,
+        );
+        scene.events.on(
+          'get-potato',
+          () => this.pulseIcon(this.potatoIcon),
+          this,
+        );
+        scene.events.on('set-time', this.handleSetTime, this);
+        scene.events.on('player-hit', this.handlePlayerHit, this);
       }
     });
+
+    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.gameScenes.forEach((sceneKey) => {
+        const scene = this.scene.get(sceneKey);
+        if (scene) {
+          scene.events.off('show-dialog');
+          scene.events.off('hide-dialog');
+          scene.events.off('get-diary');
+          scene.events.off('get-armor');
+          scene.events.off('get-potato');
+          scene.events.off('set-time');
+          scene.events.off('player-hit');
+        }
+      });
+    });
+  }
+
+  createHearts() {
+    for (let i = 0; i < this.maxHealth; i++) {
+      const heart = this.add.text(20 + i * 30, 20, '❤️', { fontSize: '24px' });
+      heart.setDepth(10);
+      this.hearts.push(heart);
+    }
+  }
+
+  handleShowDialog(text) {
+    this.dialogText.setText(text);
+    this.dialogText.setVisible(true);
+  }
+
+  handleHideDialog() {
+    this.dialogText.setVisible(false);
+  }
+
+  handleSetTime(time) {
+    let targetAlpha = 0;
+    if (time === 'dusk') targetAlpha = 0.3;
+    if (time === 'night') targetAlpha = 0.7;
+
+    this.tweens.add({
+      targets: this.darknessOverlay,
+      alpha: targetAlpha,
+      duration: 2000,
+    });
+  }
+
+  handlePlayerHit() {
+    if (this.currentHealth > 0) {
+      this.currentHealth--;
+
+      const heartToRemove = this.hearts[this.currentHealth];
+      if (heartToRemove) {
+        this.tweens.add({
+          targets: heartToRemove,
+          alpha: 0,
+          scale: 0,
+          duration: 200,
+          onComplete: () => {
+            heartToRemove.destroy();
+          },
+        });
+      } else {
+        console.error(
+          `UIScene: Error! Heart visual not found for index ${this.currentHealth}`,
+        );
+      }
+
+      if (this.currentHealth <= 0) {
+        const gameOverText = this.add
+          .text(400, 300, 'YOU DIED\nPress F5 to Restart', {
+            fontSize: '64px',
+            fill: '#ff0000',
+            align: 'center',
+            backgroundColor: '#000000aa',
+          })
+          .setOrigin(0.5)
+          .setDepth(200);
+
+        this.gameScenes.forEach((key) => {
+          const s = this.scene.get(key);
+          if (s.scene.isActive()) s.scene.pause();
+        });
+      }
+    } else {
+      console.log('UIScene: Health is already 0, ignoring hit');
+    }
   }
 
   createIcon(x, text, color) {

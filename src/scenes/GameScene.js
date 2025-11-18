@@ -1,7 +1,6 @@
 // src/scenes/GameScene.js
 import Phaser from 'phaser';
 import Player from '../entities/Player.js';
-import Enemy from '../entities/Enemy.js';
 
 export default class GameScene extends Phaser.Scene {
   map;
@@ -9,7 +8,6 @@ export default class GameScene extends Phaser.Scene {
   writer;
   armorer;
   merchant;
-  enemies;
   layers = {};
   exitZone;
 
@@ -54,13 +52,6 @@ export default class GameScene extends Phaser.Scene {
     this.merchant = this.physics.add.sprite(450, 300, 'player_sheet', 86);
     this.merchant.setDepth(2);
     this.merchant.setImmovable(true);
-
-    this.enemies = this.add.group();
-
-    const zombie1 = new Enemy(this, 200, 100, 'player_sheet', 122, this.player);
-    this.enemies.add(zombie1);
-    const zombie2 = new Enemy(this, 100, 250, 'player_sheet', 122, this.player);
-    this.enemies.add(zombie2);
 
     // Exit zone
     const exitZoneWidth = 20;
@@ -112,41 +103,10 @@ export default class GameScene extends Phaser.Scene {
 
     this.physics.add.collider(this.writer, this.layers.objects);
 
-    // Enemies Collisions
-    this.physics.add.collider(this.enemies, this.layers.ground);
-    this.physics.add.collider(this.enemies, this.layers.objects);
-    this.physics.add.collider(this.enemies, this.layers.carts);
-    this.physics.add.collider(this.enemies, this.enemies);
-
-    this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
-      player.takeDamage();
-    });
-
     // NPC collisions
     this.physics.add.collider(this.player, this.writer);
     this.physics.add.collider(this.player, this.armorer);
     this.physics.add.collider(this.player, this.merchant);
-
-    this.events.on('player-attack', (x, y, direction) => {
-      let hitX = x;
-      let hitY = y;
-      const range = 20;
-
-      if (direction === 'left') hitX -= range;
-      else if (direction === 'right') hitX += range;
-      else if (direction === 'up') hitY -= range;
-      else if (direction === 'down') hitY += range;
-
-      const swordHitbox = this.physics.add.sprite(hitX, hitY, null);
-      swordHitbox.setSize(24, 24);
-      swordHitbox.setVisible(false);
-
-      this.physics.overlap(swordHitbox, this.enemies, (sword, enemy) => {
-        enemy.disableBody(true, true);
-      });
-
-      swordHitbox.destroy();
-    });
 
     // Exit zone overlap
     this.physics.add.overlap(this.player, this.exitZone, () => {
@@ -164,10 +124,6 @@ export default class GameScene extends Phaser.Scene {
     // console.log(
     //   `Player position: x=${this.player.x.toFixed(0)}, y=${this.player.y.toFixed(0)}`,
     // );
-
-    this.enemies.children.iterate((child) => {
-      if (child) child.update();
-    });
 
     const distWriter = Phaser.Math.Distance.Between(
       this.player.x,

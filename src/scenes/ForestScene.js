@@ -30,13 +30,13 @@ export default class ForestScene extends Phaser.Scene {
       tree.setDepth(1);
     }
 
-    this.player = new Player(this, 400, 50, 'player_sheet', 112);
+    this.player = new Player(this, 15, 100, 'player_sheet', 112);
 
     this.enemies = this.add.group();
     for (let i = 0; i < 3; i++) {
       const x = Phaser.Math.Between(100, 700);
       const y = Phaser.Math.Between(200, 700);
-      const zombie = new Enemy(this, x, y, 'player_sheet', 86, this.player);
+      const zombie = new Enemy(this, x, y, 'player_sheet', 122, this.player);
       this.enemies.add(zombie);
     }
 
@@ -46,10 +46,10 @@ export default class ForestScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, trees);
     this.physics.add.collider(this.enemies, trees);
+    this.physics.add.collider(this.enemies, this.enemies);
 
     this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
-      player.setTint(0xff0000);
-      this.time.delayedCall(200, () => player.clearTint());
+      player.takeDamage();
     });
 
     this.events.on('player-attack', (x, y, direction) => {
@@ -72,6 +72,11 @@ export default class ForestScene extends Phaser.Scene {
     });
 
     this.scene.launch('UIScene');
+
+    const uiScene = this.scene.get('UIScene');
+    this.events.on('player-hit', () => {
+      uiScene.events.emit('player-hit-ui');
+    });
   }
 
   update() {
