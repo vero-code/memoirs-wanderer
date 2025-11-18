@@ -102,6 +102,27 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.armorer);
     this.physics.add.collider(this.player, this.merchant);
 
+    this.events.on('player-attack', (x, y, direction) => {
+        let hitX = x;
+        let hitY = y;
+        const range = 20;
+
+        if (direction === 'left') hitX -= range;
+        else if (direction === 'right') hitX += range;
+        else if (direction === 'up') hitY -= range;
+        else if (direction === 'down') hitY += range;
+
+        const swordHitbox = this.physics.add.sprite(hitX, hitY, null);
+        swordHitbox.setSize(24, 24);
+        swordHitbox.setVisible(false);
+
+        this.physics.overlap(swordHitbox, this.enemies, (sword, enemy) => {
+            enemy.disableBody(true, true); 
+        });
+
+        swordHitbox.destroy();
+    });
+
     this.scene.launch("UIScene");
   }
 
