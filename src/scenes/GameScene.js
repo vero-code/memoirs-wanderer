@@ -87,7 +87,15 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.enemies, this.layers.ground);
     this.physics.add.collider(this.enemies, this.layers.objects);
     this.physics.add.collider(this.enemies, this.layers.carts);
-    this.physics.add.collider(this.player, this.enemies);
+
+    this.physics.add.collider(this.enemies, this.enemies);
+
+    this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
+        player.setTint(0xff0000);
+        this.time.delayedCall(200, () => {
+            player.clearTint();
+        });
+    });
 
     // NPC collisions
     this.physics.add.collider(this.player, this.writer);
