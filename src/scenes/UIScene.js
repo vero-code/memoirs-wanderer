@@ -3,6 +3,7 @@ import Phaser from "phaser";
 
 export default class UIScene extends Phaser.Scene {
   dialogText;
+  diaryIcon;
 
   constructor() {
     super("UIScene");
@@ -21,6 +22,15 @@ export default class UIScene extends Phaser.Scene {
       .setOrigin(0.5);
     this.dialogText.setVisible(false);
 
+    this.diaryIcon = this.add.text(20, 20, "📔 Diary", {
+      fontSize: "24px",
+      fill: "#FFFF00",
+      backgroundColor: "#000000aa",
+      padding: { x: 10, y: 5 },
+    });
+    this.diaryIcon.setVisible(false);
+    this.diaryIcon.setAlpha(1);
+
     const gameScene = this.scene.get("GameScene");
     gameScene.events.on("show-dialog", (text) => {
       this.dialogText.setText(text);
@@ -29,6 +39,20 @@ export default class UIScene extends Phaser.Scene {
 
     gameScene.events.on("hide-dialog", () => {
       this.dialogText.setVisible(false);
+    });
+
+    gameScene.events.on("get-diary", () => {
+      this.diaryIcon.setVisible(true);
+      this.diaryIcon.setAlpha(1);
+
+      this.tweens.add({
+        targets: this.diaryIcon,
+        alpha: 0.2,
+        duration: 300,
+        ease: "Linear",
+        yoyo: true,
+        repeat: 3,
+      });
     });
   }
 }

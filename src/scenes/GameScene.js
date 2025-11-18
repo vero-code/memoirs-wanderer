@@ -99,6 +99,7 @@ export default class GameScene extends Phaser.Scene {
           this.hasDiary = true;
           this.justGotDiary = true;
           console.log("Diary received.");
+          this.events.emit('get-diary');
       }
       let text = "";
       if (this.justGotDiary) {
