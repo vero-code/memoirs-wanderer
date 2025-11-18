@@ -156,6 +156,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.exitZone, () => {
       console.log('Leaving the city...');
+      this.scene.stop("UIScene");
+      this.scene.start('ForestScene');
     });
 
     this.scene.launch('UIScene');

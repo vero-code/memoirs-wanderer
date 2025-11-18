@@ -1,9 +1,9 @@
 // src/scenes/PreloaderScene.js
-import Phaser from "phaser";
+import Phaser from 'phaser';
 
 export default class PreloaderScene extends Phaser.Scene {
   constructor() {
-    super("PreloaderScene");
+    super('PreloaderScene');
   }
 
   preload() {
@@ -12,40 +12,46 @@ export default class PreloaderScene extends Phaser.Scene {
     a.fillRect(200, 290, 400, 20);
 
     const loadingBar = this.add.graphics();
-    this.load.on("progress", (value) => {
+    this.load.on('progress', (value) => {
       loadingBar.clear();
       loadingBar.fillStyle(0xffffff, 1);
       loadingBar.fillRect(200, 290, 400 * value, 20);
     });
 
-    this.load.on("complete", () => {
-      const enData = this.cache.json.get("locale_en");
-      this.registry.set("locale_data", enData);
-      this.registry.set("current_lang", "en");
+    this.load.on('complete', () => {
+      const enData = this.cache.json.get('locale_en');
+      this.registry.set('locale_data', enData);
+      this.registry.set('current_lang', 'en');
 
       loadingBar.destroy();
       a.destroy();
 
-      this.scene.start("GameScene");
+      this.scene.start('GameScene');
     });
 
-    this.load.json("locale_en", "locales/en.json");
-    this.load.json("locale_ru", "locales/ru.json");
+    this.load.json('locale_en', 'locales/en.json');
+    this.load.json('locale_ru', 'locales/ru.json');
 
-    this.load.image("tiles_dungeon", "assets/tilesets/tiny_dungeon_tiles.png");
+    this.load.image('tiles_dungeon', 'assets/tilesets/tiny_dungeon_tiles.png');
     this.load.tilemapTiledJSON(
-      "map_dungeon",
-      "assets/tilesets/dungeon_map.json"
+      'map_dungeon',
+      'assets/tilesets/dungeon_map.json',
     );
 
     this.load.spritesheet(
-      "player_sheet",
-      "assets/tilesets/tiny_dungeon_tiles.png",
+      'player_sheet',
+      'assets/tilesets/tiny_dungeon_tiles.png',
       {
         frameWidth: 16,
         frameHeight: 16,
-        spacing: 1
-      }
+        spacing: 1,
+      },
     );
+
+    this.load.spritesheet('town_sheet', 'assets/tilesets/tiny_town_tiles.png', {
+      frameWidth: 16,
+      frameHeight: 16,
+      spacing: 1,
+    });
   }
 }
