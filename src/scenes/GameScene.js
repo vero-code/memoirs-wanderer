@@ -4,8 +4,12 @@ import Phaser from "phaser";
 export default class GameScene extends Phaser.Scene {
   map;
   player;
+  writer;
   layers = {};
   cursors;
+
+  hasDiary = false;
+  dialogText;
 
   constructor() {
     super("GameScene");
@@ -26,6 +30,10 @@ export default class GameScene extends Phaser.Scene {
 
     this.player = this.physics.add.sprite(110, 150, "player_sheet", 112);
     this.player.setDepth(2);
+
+    this.writer = this.physics.add.sprite(60, 290, "player_sheet", 99);
+    this.writer.setDepth(2);
+    this.writer.setImmovable(true);
 
     this.cursors = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.UP,
@@ -57,6 +65,19 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.layers.ground);
     this.physics.add.collider(this.player, this.layers.objects);
     this.physics.add.collider(this.player, this.layers.carts);
+
+    this.physics.add.collider(this.player, this.writer);
+
+    this.dialogText = this.add.text(10, 220, "", {
+      fontSize: "10px",
+      fill: "#ffffff",
+      backgroundColor: "#000000",
+      padding: { x: 5, y: 5 },
+      wordWrap: { width: 300 },
+    });
+    this.dialogText.setScrollFactor(0);
+    this.dialogText.setDepth(100);
+    this.dialogText.setVisible(false);
   }
 
   update(time, delta) {
@@ -76,5 +97,27 @@ export default class GameScene extends Phaser.Scene {
       this.player.setVelocityY(speed);
     }
     this.player.body.velocity.normalize().scale(speed);
+
+    const dist = Phaser.Math.Distance.Between(
+      this.player.x,
+      this.player.y,
+      this.writer.x,
+      this.writer.y
+    );
+
+    if (dist < 30) {
+      this.dialogText.setVisible(true);
+      if (this.hasDiary) {
+         this.dialogText.setText('Writer: "Good luck! Don\'t forget to write."');
+      } else {
+         this.dialogText.setText('Writer: "Hello! Take this diary..."');
+      }
+    } else {
+      this.dialogText.setVisible(false);
+      if (dist > 30 && dist < 40 && !this.hasDiary) {
+          this.hasDiary = true;
+          console.log("Diary received.");
+      }
+    }
   }
 }
