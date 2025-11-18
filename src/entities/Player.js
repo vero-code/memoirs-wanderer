@@ -1,10 +1,9 @@
 // src/entities/Player.js
-import Phaser from "phaser";
+import Phaser from 'phaser';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   cursors;
   spaceKey;
-
   isAttacking = false;
   lastDirection = 'down';
 
@@ -27,7 +26,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       S: Phaser.Input.Keyboard.KeyCodes.S,
       D: Phaser.Input.Keyboard.KeyCodes.D,
     });
-    this.spaceKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.spaceKey = scene.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE,
+    );
   }
 
   update() {
@@ -61,7 +62,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.body.velocity.normalize().scale(speed);
 
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-        this.attack();
+      this.attack();
     }
   }
 
@@ -79,16 +80,27 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     else if (this.lastDirection === 'down') targetY += lungeDist;
 
     this.scene.tweens.add({
-        targets: this,
-        x: targetX,
-        y: targetY,
-        duration: 50,
-        yoyo: true,
-        onComplete: () => {
-            this.isAttacking = false;
-        }
+      targets: this,
+      x: targetX,
+      y: targetY,
+      duration: 50,
+      yoyo: true,
+      onComplete: () => {
+        this.isAttacking = false;
+      },
     });
 
     this.scene.events.emit('player-attack', this.x, this.y, this.lastDirection);
+  }
+
+  takeDamage() {
+    if (this.alpha < 1) return;
+    this.setTint(0xff0000);
+    this.setAlpha(0.5);
+    this.scene.events.emit('player-hit');
+    this.scene.time.delayedCall(1000, () => {
+      this.clearTint();
+      this.setAlpha(1);
+    });
   }
 }

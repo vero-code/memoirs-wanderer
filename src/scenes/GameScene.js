@@ -69,7 +69,12 @@ export default class GameScene extends Phaser.Scene {
     const mapRight = this.map.widthInPixels - 10;
     const mapMiddle = this.map.heightInPixels / 2;
 
-    this.exitZone = this.add.zone(mapRight, mapMiddle, exitZoneWidth, exitZoneHeight);
+    this.exitZone = this.add.zone(
+      mapRight,
+      mapMiddle,
+      exitZoneWidth,
+      exitZoneHeight,
+    );
     this.physics.world.enable(this.exitZone);
     this.exitZone.body.setAllowGravity(false);
     this.exitZone.body.moves = false;
@@ -111,14 +116,10 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.enemies, this.layers.ground);
     this.physics.add.collider(this.enemies, this.layers.objects);
     this.physics.add.collider(this.enemies, this.layers.carts);
-
     this.physics.add.collider(this.enemies, this.enemies);
 
     this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
-      player.setTint(0xff0000);
-      this.time.delayedCall(200, () => {
-        player.clearTint();
-      });
+      player.takeDamage();
     });
 
     // NPC collisions
@@ -147,16 +148,10 @@ export default class GameScene extends Phaser.Scene {
       swordHitbox.destroy();
     });
 
-    this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
-      player.setTint(0xff0000);
-      this.time.delayedCall(200, () => {
-        player.clearTint();
-      });
-    });
-
+    // Exit zone overlap
     this.physics.add.overlap(this.player, this.exitZone, () => {
       console.log('Leaving the city...');
-      this.scene.stop("UIScene");
+      this.scene.stop('UIScene');
       this.scene.start('ForestScene');
     });
 
