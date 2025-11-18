@@ -5,11 +5,17 @@ export default class GameScene extends Phaser.Scene {
   map;
   player;
   writer;
+  armorer;
   layers = {};
   cursors;
 
   hasDiary = false;
   justGotDiary = false;
+
+  hasArmor = false;
+  justGotArmor = false;
+
+  activeNPC = null;
 
   constructor() {
     super("GameScene");
@@ -34,6 +40,11 @@ export default class GameScene extends Phaser.Scene {
     this.writer = this.physics.add.sprite(60, 290, "player_sheet", 99);
     this.writer.setDepth(2);
     this.writer.setImmovable(true);
+
+    this.armorer = this.physics.add.sprite(280, 280, "player_sheet", 87);
+    this.armorer.setDepth(2);
+    this.armorer.setImmovable(true);
+    this.armorer.setFlipX(true);
 
     this.cursors = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.UP,
@@ -67,6 +78,7 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.layers.carts);
 
     this.physics.add.collider(this.player, this.writer);
+    this.physics.add.collider(this.player, this.armorer);
 
     this.scene.launch("UIScene");
   }
@@ -89,30 +101,48 @@ export default class GameScene extends Phaser.Scene {
     }
     this.player.body.velocity.normalize().scale(speed);
 
-    const dist = Phaser.Math.Distance.Between(
-      this.player.x, this.player.y,
-      this.writer.x, this.writer.y
+    const distWriter = Phaser.Math.Distance.Between(
+      this.player.x,
+      this.player.y,
+      this.writer.x,
+      this.writer.y
+    );
+    const distArmorer = Phaser.Math.Distance.Between(
+      this.player.x,
+      this.player.y,
+      this.armorer.x,
+      this.armorer.y
     );
 
-    if (dist < 30) {
+    if (distWriter < 30) {
       if (!this.hasDiary) {
-          this.hasDiary = true;
-          this.justGotDiary = true;
-          console.log("Diary received.");
-          this.events.emit('get-diary');
+        this.hasDiary = true;
+        this.justGotDiary = true;
+        console.log("Diary received.");
+        this.events.emit("get-diary");
       }
-      let text = "";
-      if (this.justGotDiary) {
-         text = 'Writer: "Hello! Take this diary..."';
-      } else {
-         text = 'Writer: "Good luck! Don\'t forget to write."';
-      }
+      let text = this.justGotDiary
+        ? 'Writer: "Hello! Take this diary..."'
+        : 'Writer: "Good luck! Don\'t forget to write."';
       this.events.emit("show-dialog", text);
+      this.activeNPC = "writer";
+    } else if (distArmorer < 30) {
+      if (!this.hasArmor) {
+        this.hasArmor = true;
+        this.justGotArmor = true;
+        console.log("Armor received.");
+        this.events.emit("get-armor");
+      }
+      let text = this.justGotArmor
+        ? 'Armorer: "Dangerous out there. Take this armor!"'
+        : 'Armorer: "Stay safe, traveler."';
+      this.events.emit("show-dialog", text);
+      this.activeNPC = "armorer";
     } else {
       this.events.emit("hide-dialog");
-      if (this.justGotDiary) {
-          this.justGotDiary = false;
-      }
+      if (this.justGotDiary) this.justGotDiary = false;
+      if (this.justGotArmor) this.justGotArmor = false;
+      this.activeNPC = null;
     }
   }
 }
