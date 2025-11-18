@@ -7,6 +7,7 @@ export default class GameScene extends Phaser.Scene {
   player;
   writer;
   armorer;
+  merchant;
   layers = {};
 
   hasDiary = false;
@@ -14,6 +15,9 @@ export default class GameScene extends Phaser.Scene {
 
   hasArmor = false;
   justGotArmor = false;
+
+  hasPotato = false;
+  justGotPotato = false;
 
   activeNPC = null;
 
@@ -43,6 +47,10 @@ export default class GameScene extends Phaser.Scene {
     this.armorer.setImmovable(true);
     this.armorer.setFlipX(true);
 
+    this.merchant = this.physics.add.sprite(200, 200, "player_sheet", 86);
+    this.merchant.setDepth(2);
+    this.merchant.setImmovable(true);
+
     const camera = this.cameras.main;
     camera.startFollow(this.player);
     camera.setZoom(2);
@@ -64,6 +72,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, this.writer);
     this.physics.add.collider(this.player, this.armorer);
+    this.physics.add.collider(this.player, this.merchant);
 
     this.scene.launch("UIScene");
   }
@@ -77,7 +86,11 @@ export default class GameScene extends Phaser.Scene {
     );
     const distArmorer = Phaser.Math.Distance.Between(
       this.player.x, this.player.y,
-      this.armorer.x, this.armorer.y
+      this.writer.x, this.writer.y
+    );
+    const distMerchant = Phaser.Math.Distance.Between(
+      this.player.x, this.player.y,
+      this.writer.x, this.writer.y
     );
 
     if (distWriter < 30) {
@@ -104,10 +117,23 @@ export default class GameScene extends Phaser.Scene {
         : 'Armorer: "Stay safe, traveler."';
       this.events.emit("show-dialog", text);
       this.activeNPC = "armorer";
+    } else if (distMerchant < 30) {
+      if (!this.hasPotato) {
+        this.hasPotato = true;
+        this.justGotPotato = true;
+        console.log("Potato received.");
+        this.events.emit("get-potato");
+      }
+      let text = this.justGotPotato
+        ? 'Merchant: "Fresh potatoes! Best price!"'
+        : 'Merchant: "Come back if you get hungry."';
+      this.events.emit("show-dialog", text);
+      this.activeNPC = "merchant";
     } else {
       this.events.emit("hide-dialog");
       if (this.justGotDiary) this.justGotDiary = false;
       if (this.justGotArmor) this.justGotArmor = false;
+      if (this.justGotPotato) this.justGotPotato = false;
       this.activeNPC = null;
     }
   }

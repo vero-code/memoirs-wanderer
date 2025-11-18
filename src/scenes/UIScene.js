@@ -5,6 +5,7 @@ export default class UIScene extends Phaser.Scene {
   dialogText;
   diaryIcon;
   armorIcon;
+  potatoIcon;
 
   constructor() {
     super("UIScene");
@@ -42,7 +43,17 @@ export default class UIScene extends Phaser.Scene {
     this.armorIcon.setVisible(false);
     this.armorIcon.setAlpha(1);
 
+    this.potatoIcon = this.add.text(370, 20, "🥔 Potato", {
+      fontSize: "20px",
+      fill: "#FFA500",
+      backgroundColor: "#000000aa",
+      padding: { x: 10, y: 5 },
+    });
+    this.potatoIcon.setVisible(false);
+    this.potatoIcon.setAlpha(1);
+
     const gameScene = this.scene.get("GameScene");
+
     gameScene.events.on("show-dialog", (text) => {
       this.dialogText.setText(text);
       this.dialogText.setVisible(true);
@@ -55,27 +66,28 @@ export default class UIScene extends Phaser.Scene {
     gameScene.events.on("get-diary", () => {
       this.diaryIcon.setVisible(true);
       this.diaryIcon.setAlpha(1);
-
-      this.tweens.add({
-        targets: this.diaryIcon,
-        alpha: 0.2,
-        duration: 300,
-        ease: "Linear",
-        yoyo: true,
-        repeat: 3,
-      });
+      this.pulseIcon(this.diaryIcon);
     });
 
     gameScene.events.on("get-armor", () => {
       this.armorIcon.setVisible(true);
-      this.tweens.add({
-        targets: this.armorIcon,
-        alpha: 0.2,
-        duration: 300,
-        ease: "Linear",
-        yoyo: true,
-        repeat: 3,
-      });
+      this.pulseIcon(this.armorIcon);
+    });
+
+    gameScene.events.on("get-potato", () => {
+      this.potatoIcon.setVisible(true);
+      this.pulseIcon(this.potatoIcon);
+    });
+  }
+
+  pulseIcon(target) {
+    this.tweens.add({
+      targets: target,
+      alpha: 0.2,
+      duration: 300,
+      ease: "Linear",
+      yoyo: true,
+      repeat: 3,
     });
   }
 }
