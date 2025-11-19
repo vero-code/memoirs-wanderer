@@ -2,6 +2,7 @@
 import Phaser from 'phaser';
 import Player from '../entities/Player.js';
 import Enemy from '../entities/Enemy.js';
+import AmbushBush from '../entities/AmbushBush.js';
 import { ExitZoneHelper } from '../utils/ExitZoneHelper.js';
 import { TimeOfDayHelper } from '../utils/TimeOfDayHelper.js';
 import { CombatHelper } from '../utils/CombatHelper.js';
@@ -9,6 +10,7 @@ import { CombatHelper } from '../utils/CombatHelper.js';
 export default class ForestScene extends Phaser.Scene {
   player;
   enemies;
+  ambushBushes;
   isEvening = false;
 
   constructor() {
@@ -20,6 +22,7 @@ export default class ForestScene extends Phaser.Scene {
     this.createWorld();
     this.createPlayer();
     this.createEnemies();
+    this.createAmbushBushes();
     this.setupCamera();
     this.setupCollisions();
     this.setupCombat();
@@ -44,7 +47,7 @@ export default class ForestScene extends Phaser.Scene {
 
     // Trees
     this.trees = this.physics.add.staticGroup();
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 40; i++) {
       const x = Phaser.Math.Between(50, 750);
       const y = Phaser.Math.Between(50, 750);
       const tree = this.trees.create(x, y, 'town_sheet', 5);
@@ -61,11 +64,30 @@ export default class ForestScene extends Phaser.Scene {
 
   createEnemies() {
     this.enemies = this.add.group();
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       const x = Phaser.Math.Between(100, 700);
       const y = Phaser.Math.Between(200, 700);
       const zombie = new Enemy(this, x, y, 'player_sheet', 122, this.player);
       this.enemies.add(zombie);
+    }
+  }
+
+  createAmbushBushes() {
+    this.ambushBushes = this.add.group({ runChildUpdate: true });
+
+    for (let i = 0; i < 15; i++) {
+      const x = Phaser.Math.Between(100, 750);
+      const y = Phaser.Math.Between(50, 750);
+      const bush = new AmbushBush(
+        this,
+        x,
+        y,
+        'town_sheet',
+        5,
+        this.player,
+        this.enemies,
+      );
+      this.ambushBushes.add(bush);
     }
   }
 
@@ -78,6 +100,7 @@ export default class ForestScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.trees);
     this.physics.add.collider(this.enemies, this.trees);
     this.physics.add.collider(this.enemies, this.enemies);
+    this.physics.add.collider(this.player, this.ambushBushes);
     this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
       player.takeDamage();
     });
@@ -113,6 +136,9 @@ export default class ForestScene extends Phaser.Scene {
     this.events.off('player-attack');
     if (this.enemies) {
       this.enemies.clear(true, true);
+    }
+    if (this.ambushBushes) {
+      this.ambushBushes.clear(true, true);
     }
   }
 
