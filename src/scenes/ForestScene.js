@@ -67,6 +67,7 @@ export default class ForestScene extends Phaser.Scene {
 
       this.physics.overlap(swordHitbox, this.enemies, (sword, enemy) => {
         enemy.disableBody(true, true);
+        this.events.emit('enemy-killed');
       });
       this.time.delayedCall(50, () => swordHitbox.destroy());
     });

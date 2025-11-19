@@ -10,6 +10,8 @@ export default class UIScene extends Phaser.Scene {
   hearts = [];
   maxHealth = 3;
   currentHealth = 3;
+  scoreText;
+  score = 0;
 
   gameScenes = ['GameScene', 'ForestScene'];
 
@@ -20,6 +22,7 @@ export default class UIScene extends Phaser.Scene {
   create() {
     this.hearts = [];
     this.currentHealth = this.maxHealth;
+    this.score = 0;
 
     // Dialog text
     this.dialogText = this.add
@@ -34,6 +37,16 @@ export default class UIScene extends Phaser.Scene {
       .setOrigin(0.5);
     this.dialogText.setVisible(false);
     this.dialogText.setDepth(100);
+
+    this.scoreText = this.add
+      .text(400, 20, '💀 Score: 0', {
+        fontSize: '24px',
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5, 0);
+    this.scoreText.setDepth(100);
 
     this.createHearts();
 
@@ -58,6 +71,7 @@ export default class UIScene extends Phaser.Scene {
         scene.events.off('get-potato');
         scene.events.off('set-time');
         scene.events.off('player-hit');
+        scene.events.off('enemy-killed');
 
         scene.events.on('show-dialog', this.handleShowDialog, this);
         scene.events.on('hide-dialog', this.handleHideDialog, this);
@@ -78,7 +92,20 @@ export default class UIScene extends Phaser.Scene {
         );
         scene.events.on('set-time', this.handleSetTime, this);
         scene.events.on('player-hit', this.handlePlayerHit, this);
+        scene.events.on('enemy-killed', this.handleEnemyKilled, this);
       }
+    });
+  }
+
+  handleEnemyKilled() {
+    this.score += 100;
+    this.scoreText.setText(`💀 Score: ${this.score}`);
+
+    this.tweens.add({
+      targets: this.scoreText,
+      scale: 1.2,
+      duration: 100,
+      yoyo: true,
     });
   }
 
