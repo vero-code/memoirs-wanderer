@@ -43,6 +43,7 @@ export default class UIScene extends Phaser.Scene {
   backpackContainer;
   isInventoryOpen = false;
   inventorySlots = [];
+  tooltipText;
 
   // State
   score = 0;
@@ -194,6 +195,13 @@ export default class UIScene extends Phaser.Scene {
       this.inventorySlots.push({ x, y });
     }
 
+    this.tooltipText = this.add.text(0, 80, '', {
+        fontSize: '16px',
+        fill: '#ffff00',
+        fontStyle: 'italic'
+    }).setOrigin(0.5);
+    this.inventoryContainer.add(this.tooltipText);
+
     this.refreshInventory();
   }
 
@@ -202,6 +210,7 @@ export default class UIScene extends Phaser.Scene {
     this.inventoryContainer.setVisible(this.isInventoryOpen);
     if (this.isInventoryOpen) {
       this.refreshInventory();
+      this.tooltipText.setText('');
     }
   }
 
@@ -224,6 +233,16 @@ export default class UIScene extends Phaser.Scene {
             padding: { x:0, y:0 }
         }).setOrigin(0.5);
         icon.setName('itemIcon');
+        icon.setInteractive({ useHandCursor: true });
+        icon.on('pointerover', () => {
+            const localizedName = this.getText(item.label);
+            this.tooltipText.setText(localizedName);
+            icon.setScale(1.2);
+        });
+        icon.on('pointerout', () => {
+            this.tooltipText.setText('');
+            icon.setScale(1);
+        });
         this.inventoryContainer.add(icon);
 
         slotIndex++;
@@ -289,6 +308,8 @@ export default class UIScene extends Phaser.Scene {
       );
     if (this.restartButton)
       this.restartButton.setText(this.getText('uiRestart'));
+
+    this.tooltipText.setText('');
   }
 
   // --- EFFECTS ---
