@@ -22,6 +22,8 @@ export default class GameScene extends Phaser.Scene {
   activeNPC = null;
   isEvening = false;
 
+  startPosition = { x: 110, y: 150 };
+
   constructor() {
     super('GameScene');
   }
@@ -36,6 +38,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.hasDiary = this.registry.get('hasDiary') || false;
+    this.hasArmor = this.registry.get('hasArmor') || false;
+    this.hasPotato = this.registry.get('hasPotato') || false;
+    this.isEvening = this.registry.get('isEvening') || false;
+
     this.map = this.make.tilemap({ key: 'map_dungeon' });
     const tileset = this.map.addTilesetImage('tileset', 'tiles_dungeon');
 
@@ -46,7 +53,13 @@ export default class GameScene extends Phaser.Scene {
     this.layers.carts = this.map.createLayer('Carts', tileset, 0, 0);
     this.layers.carts.setDepth(3);
 
-    this.player = new Player(this, this.startPosition.x, this.startPosition.y, 'player_sheet', 112);
+    this.player = new Player(
+      this,
+      this.startPosition.x,
+      this.startPosition.y,
+      'player_sheet',
+      112,
+    );
 
     // NPC
     this.writer = this.physics.add.sprite(60, 290, 'player_sheet', 99);
@@ -125,6 +138,16 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.scene.launch('UIScene');
+    this.applyTimeOfDay();
+  }
+
+  applyTimeOfDay() {
+    if (this.isEvening) {
+      this.time.delayedCall(100, () => {
+        console.log('🌆 Applying time: dusk');
+        this.events.emit('set-time', 'dusk');
+      });
+    }
   }
 
   update(time, delta) {
@@ -157,6 +180,7 @@ export default class GameScene extends Phaser.Scene {
       if (!this.hasDiary) {
         this.hasDiary = true;
         this.justGotDiary = true;
+        this.registry.set('hasDiary', true);
         console.log('Diary received.');
         this.events.emit('get-diary');
       }
@@ -169,6 +193,7 @@ export default class GameScene extends Phaser.Scene {
       if (!this.hasArmor) {
         this.hasArmor = true;
         this.justGotArmor = true;
+        this.registry.set('hasArmor', true);
         console.log('Armor received.');
         this.events.emit('get-armor');
       }
@@ -181,12 +206,14 @@ export default class GameScene extends Phaser.Scene {
       if (!this.hasPotato) {
         this.hasPotato = true;
         this.justGotPotato = true;
+        this.registry.set('hasPotato', true);
         console.log('Potato received.');
         this.events.emit('get-potato');
 
         if (!this.isEvening) {
           this.isEvening = true;
-          this.events.emit('set-time', 'dusk');
+          this.registry.set('isEvening', true);
+          this.applyTimeOfDay();
         }
       }
       let text = this.justGotPotato
@@ -201,5 +228,12 @@ export default class GameScene extends Phaser.Scene {
       if (this.justGotPotato) this.justGotPotato = false;
       this.activeNPC = null;
     }
+  }
+
+  setEvening() {
+    console.log('🌅 Setting evening for the first time');
+    this.isEvening = true;
+    this.registry.set('isEvening', true);
+    this.events.emit('set-time', 'dusk');
   }
 }

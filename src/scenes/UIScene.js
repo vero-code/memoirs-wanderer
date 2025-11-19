@@ -55,6 +55,19 @@ export default class UIScene extends Phaser.Scene {
     this.armorIcon = this.createIcon(510, '🛡️ Armor', '#00FFFF');
     this.potatoIcon = this.createIcon(370, '🥔 Potato', '#FFA500');
 
+    if (this.registry.get('hasDiary')) {
+      this.diaryIcon.setVisible(true);
+      this.diaryIcon.setAlpha(1);
+    }
+    if (this.registry.get('hasArmor')) {
+      this.armorIcon.setVisible(true);
+      this.armorIcon.setAlpha(1);
+    }
+    if (this.registry.get('hasPotato')) {
+      this.potatoIcon.setVisible(true);
+      this.potatoIcon.setAlpha(1);
+    }
+
     // Darkness overlay
     this.darknessOverlay = this.add.rectangle(0, 0, 800, 600, 0x000022); // Dark blue tint
     this.darknessOverlay.setOrigin(0, 0);
@@ -206,6 +219,11 @@ export default class UIScene extends Phaser.Scene {
   }
 
   restartGame() {
+    this.registry.set('hasDiary', false);
+    this.registry.set('hasArmor', false);
+    this.registry.set('hasPotato', false);
+    this.registry.set('isEvening', false);
+    
     this.gameScenes.forEach((key) => {
       this.scene.stop(key);
     });
