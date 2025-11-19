@@ -2,22 +2,48 @@
 import Phaser from 'phaser';
 import { HealthDisplay } from '../components/HealthDisplay.js';
 
+const INVENTORY_ITEMS = [
+  {
+    id: 'diary',
+    regKey: 'hasDiary',
+    label: 'uiDiary',
+    color: '#FFFF00',
+    event: 'get-diary',
+  },
+  {
+    id: 'armor',
+    regKey: 'hasArmor',
+    label: 'uiArmor',
+    color: '#00FFFF',
+    event: 'get-armor',
+  },
+  {
+    id: 'potato',
+    regKey: 'hasPotato',
+    label: 'uiPotato',
+    color: '#FFA500',
+    event: 'get-potato',
+  },
+];
+
 export default class UIScene extends Phaser.Scene {
   dialogText;
-  diaryIcon;
-  armorIcon;
-  potatoIcon;
-  darknessOverlay;
-  healthDisplay;
   scoreText;
   langButton;
-  score = 0;
+  darknessOverlay;
+  healthDisplay;
+
+  // Game Over
   gameOverText;
   finalScoreText;
   restartButton;
 
-  gameScenes = ['GameScene', 'ForestScene'];
+  // Inventory
+  inventoryContainer;
 
+  // State
+  score = 0;
+  gameScenes = ['GameScene', 'ForestScene'];
   initialIsEvening = false;
   initialAnimated = false;
 
@@ -30,20 +56,18 @@ export default class UIScene extends Phaser.Scene {
     this.initialAnimated = data?.animated !== undefined ? data.animated : false;
   }
 
-  getText(key) {
-    const localeData = this.registry.get('locale_data');
-    return localeData ? localeData[key] : key;
-  }
-
   create() {
     this.resetState();
+
     this.createUI();
     this.createHealthDisplay();
-    this.createIcons();
-    this.restoreInventoryUI();
+
+    this.createInventorySystem();
+
     this.createLanguageButton();
     this.createDarknessOverlay();
     this.applyInitialTimeOfDay();
+
     this.connectGameSceneEvents();
   }
 
@@ -56,6 +80,13 @@ export default class UIScene extends Phaser.Scene {
     this.finalScoreText = null;
     this.restartButton = null;
   }
+
+  getText(key) {
+    const localeData = this.registry.get('locale_data');
+    return localeData ? localeData[key] : key;
+  }
+
+  // --- CREATING AN INTERFACE ---
 
   createUI() {
     // Dialog text
@@ -88,45 +119,39 @@ export default class UIScene extends Phaser.Scene {
     this.healthDisplay = new HealthDisplay(this, 3);
   }
 
-  createIcons() {
-    this.diaryIcon = this.createIcon(650, 'uiDiary', '#FFFF00');
-    this.armorIcon = this.createIcon(510, 'uiArmor', '#00FFFF');
-    this.potatoIcon = this.createIcon(370, 'uiPotato', '#FFA500');
+  // --- NEW INVENTORY SYSTEM ---
+
+  createInventorySystem() {
+    this.inventoryContainer = this.add.container(780, 70);
+    this.inventoryContainer.setDepth(90);
+    this.refreshInventory();
   }
 
-  createIcon(x, key, color) {
-    const icon = this.add.text(x, 20, this.getText(key), {
-      fontSize: '20px',
-      fill: color,
-      backgroundColor: '#000000aa',
-      padding: { x: 10, y: 5 },
+  refreshInventory() {
+    this.inventoryContainer.removeAll(true);
+    let yOffset = 0;
+
+    INVENTORY_ITEMS.forEach((item) => {
+      if (this.registry.get(item.regKey)) {
+        const itemIcon = this.add
+          .text(0, yOffset, this.getText(item.label), {
+            fontSize: '18px',
+            fill: item.color,
+            backgroundColor: '#000000aa',
+            padding: { x: 8, y: 4 },
+          })
+          .setOrigin(1, 0);
+
+        itemIcon.setName(item.id);
+        itemIcon.setData('localeKey', item.label);
+
+        this.inventoryContainer.add(itemIcon);
+        yOffset += 35;
+      }
     });
-    icon.setVisible(false);
-    icon.setAlpha(1);
-    icon.setDepth(10);
-    icon.localeKey = key;
-    return icon;
   }
 
-  restoreInventoryUI() {
-    if (this.registry.get('hasDiary')) {
-      this.diaryIcon.setVisible(true);
-      this.diaryIcon.setAlpha(1);
-    }
-    if (this.registry.get('hasArmor')) {
-      this.armorIcon.setVisible(true);
-      this.armorIcon.setAlpha(1);
-    }
-    if (this.registry.get('hasPotato')) {
-      this.potatoIcon.setVisible(true);
-      this.potatoIcon.setAlpha(1);
-    }
-  }
-
-  getText(key) {
-    const localeData = this.registry.get('locale_data');
-    return localeData ? localeData[key] : key;
-  }
+  // --- LANGUAGE AND SETTINGS ---
 
   createLanguageButton() {
     const currentLang = this.registry.get('current_lang') || 'en';
@@ -175,12 +200,10 @@ export default class UIScene extends Phaser.Scene {
   updateUITexts() {
     this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
 
-    if (this.diaryIcon)
-      this.diaryIcon.setText(this.getText(this.diaryIcon.localeKey));
-    if (this.armorIcon)
-      this.armorIcon.setText(this.getText(this.armorIcon.localeKey));
-    if (this.potatoIcon)
-      this.potatoIcon.setText(this.getText(this.potatoIcon.localeKey));
+    this.inventoryContainer.each((icon) => {
+      const key = icon.getData('localeKey');
+      if (key) icon.setText(this.getText(key));
+    });
 
     if (this.gameOverText) this.gameOverText.setText(this.getText('uiYouDied'));
     if (this.finalScoreText)
@@ -190,6 +213,8 @@ export default class UIScene extends Phaser.Scene {
     if (this.restartButton)
       this.restartButton.setText(this.getText('uiRestart'));
   }
+
+  // --- EFFECTS ---
 
   createDarknessOverlay() {
     this.darknessOverlay = this.add.rectangle(0, 0, 800, 600, 0x000022);
@@ -203,6 +228,8 @@ export default class UIScene extends Phaser.Scene {
       this.darknessOverlay.setAlpha(0.3);
     }
   }
+
+  // --- EVENTS ---
 
   connectGameSceneEvents() {
     this.gameScenes.forEach((sceneKey) => {
@@ -224,23 +251,34 @@ export default class UIScene extends Phaser.Scene {
   disconnectSceneEvents(scene) {
     scene.events.off('show-dialog');
     scene.events.off('hide-dialog');
-    scene.events.off('get-diary');
-    scene.events.off('get-armor');
-    scene.events.off('get-potato');
     scene.events.off('set-time');
     scene.events.off('player-hit');
     scene.events.off('enemy-killed');
+
+    INVENTORY_ITEMS.forEach((item) => scene.events.off(item.event));
   }
 
   connectSceneEvents(scene) {
     scene.events.on('show-dialog', this.handleShowDialog, this);
     scene.events.on('hide-dialog', this.handleHideDialog, this);
-    scene.events.on('get-diary', () => this.pulseIcon(this.diaryIcon), this);
-    scene.events.on('get-armor', () => this.pulseIcon(this.armorIcon), this);
-    scene.events.on('get-potato', () => this.pulseIcon(this.potatoIcon), this);
     scene.events.on('set-time', this.handleSetTime, this);
     scene.events.on('player-hit', this.handlePlayerHit, this);
     scene.events.on('enemy-killed', this.handleEnemyKilled, this);
+
+    INVENTORY_ITEMS.forEach((item) => {
+      scene.events.on(
+        item.event,
+        () => {
+          this.refreshInventory();
+
+          const itemIcon = this.inventoryContainer.getByName(item.id);
+          if (itemIcon) {
+            this.pulseIcon(itemIcon);
+          }
+        },
+        this,
+      );
+    });
   }
 
   handleShowDialog(text) {
@@ -291,6 +329,21 @@ export default class UIScene extends Phaser.Scene {
     });
   }
 
+  pulseIcon(target) {
+    target.setAlpha(1);
+    this.tweens.add({
+      targets: target,
+      alpha: 0.2,
+      duration: 300,
+      ease: 'Linear',
+      yoyo: true,
+      repeat: 3,
+      onComplete: () => target.setAlpha(1),
+    });
+  }
+
+  // --- GAME OVER LOGIC ---
+  
   triggerGameOver() {
     this.createGameOverScreen();
     this.pauseGameScenes();
@@ -368,9 +421,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   clearGameState() {
-    this.registry.set('hasDiary', false);
-    this.registry.set('hasArmor', false);
-    this.registry.set('hasPotato', false);
+    INVENTORY_ITEMS.forEach((item) => this.registry.set(item.regKey, false));
     this.registry.set('isEvening', false);
     this.registry.set('score', 0);
   }
@@ -378,18 +429,6 @@ export default class UIScene extends Phaser.Scene {
   stopAllGameScenes() {
     this.gameScenes.forEach((key) => {
       this.scene.stop(key);
-    });
-  }
-
-  pulseIcon(target) {
-    target.setVisible(true);
-    this.tweens.add({
-      targets: target,
-      alpha: 0.2,
-      duration: 300,
-      ease: 'Linear',
-      yoyo: true,
-      repeat: 3,
     });
   }
 }
