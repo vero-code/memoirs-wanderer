@@ -10,9 +10,11 @@ export class HealthDisplay {
   }
 
   createHearts() {
+    this.hearts.forEach((h) => h.destroy());
+    this.hearts = [];
     for (let i = 0; i < this.maxHealth; i++) {
-      const heart = this.scene.add.text(20 + i * 30, 20, '❤️', { 
-        fontSize: '24px' 
+      const heart = this.scene.add.text(20 + i * 30, 20, '❤️', {
+        fontSize: '24px',
       });
       heart.setDepth(10);
       this.hearts.push(heart);
@@ -24,21 +26,39 @@ export class HealthDisplay {
       this.currentHealth--;
       
       const heartToRemove = this.hearts[this.currentHealth];
+      this.flashRemainingHearts();
       if (heartToRemove) {
-        this.animateHeartRemoval(heartToRemove);
+        this.animateHeartDeath(heartToRemove);
       }
-      
-      return this.currentHealth === 0; // Returns true if dead
+      return this.currentHealth === 0;
     }
     return false;
   }
 
-  animateHeartRemoval(heart) {
+  flashRemainingHearts() {
+    for (let i = 0; i < this.currentHealth; i++) {
+      const heart = this.hearts[i];
+      if (heart && heart.active) {
+        this.scene.tweens.add({
+          targets: heart,
+          alpha: 0.5,
+          scale: 1.2,
+          duration: 100,
+          yoyo: true,
+          repeat: 1,
+        });
+      }
+    }
+  }
+
+  animateHeartDeath(heart) {
     this.scene.tweens.add({
       targets: heart,
       alpha: 0,
-      scale: 0,
-      duration: 200,
+      scale: 2,
+      angle: 360,
+      duration: 400,
+      ease: 'Power1',
       onComplete: () => {
         heart.destroy();
       },
@@ -46,10 +66,8 @@ export class HealthDisplay {
   }
 
   reset() {
-    this.hearts.forEach(heart => heart.destroy());
-    this.hearts = [];
-    this.currentHealth = this.maxHealth;
     this.createHearts();
+    this.currentHealth = this.maxHealth;
   }
 
   getCurrentHealth() {
