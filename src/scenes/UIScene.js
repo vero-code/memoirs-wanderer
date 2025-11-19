@@ -7,6 +7,8 @@ const INVENTORY_ITEMS = [
     id: 'diary',
     regKey: 'hasDiary',
     label: 'uiDiary',
+    texture: 'town_sheet',
+    frame: 10,
     color: '#FFFF00',
     event: 'get-diary',
   },
@@ -14,6 +16,8 @@ const INVENTORY_ITEMS = [
     id: 'armor',
     regKey: 'hasArmor',
     label: 'uiArmor',
+    texture: 'town_sheet',
+    frame: 5,
     color: '#00FFFF',
     event: 'get-armor',
   },
@@ -21,6 +25,8 @@ const INVENTORY_ITEMS = [
     id: 'potato',
     regKey: 'hasPotato',
     label: 'uiPotato',
+    texture: 'town_sheet',
+    frame: 25,
     color: '#FFA500',
     event: 'get-potato',
   },
@@ -40,6 +46,8 @@ export default class UIScene extends Phaser.Scene {
 
   // Inventory
   inventoryContainer;
+  isInventoryOpen = false;
+  inventorySlots = [];
 
   // State
   score = 0;
@@ -69,6 +77,10 @@ export default class UIScene extends Phaser.Scene {
     this.applyInitialTimeOfDay();
 
     this.connectGameSceneEvents();
+
+    this.input.keyboard.on('keydown-I', () => {
+      this.toggleInventory();
+    });
   }
 
   resetState() {
@@ -122,31 +134,66 @@ export default class UIScene extends Phaser.Scene {
   // --- NEW INVENTORY SYSTEM ---
 
   createInventorySystem() {
-    this.inventoryContainer = this.add.container(780, 70);
-    this.inventoryContainer.setDepth(90);
+    this.inventoryContainer = this.add.container(400, 300);
+    this.inventoryContainer.setDepth(200);
+    this.inventoryContainer.setVisible(false);
+
+    const bg = this.add.rectangle(0, 0, 300, 200, 0x222222, 0.9);
+    bg.setStrokeStyle(2, 0xffffff);
+    this.inventoryContainer.add(bg);
+
+    const title = this.add
+      .text(0, -80, 'INVENTORY', { fontSize: '20px', fontStyle: 'bold' })
+      .setOrigin(0.5);
+    this.inventoryContainer.add(title);
+
+    const startX = -100;
+    const startY = -40;
+    const slotSize = 50;
+    const gap = 10;
+
+    for (let i = 0; i < 8; i++) {
+      const col = i % 4;
+      const row = Math.floor(i / 4);
+      const x = startX + col * (slotSize + gap);
+      const y = startY + row * (slotSize + gap);
+      const slot = this.add.rectangle(x, y, slotSize, slotSize, 0x000000, 0.5);
+      slot.setStrokeStyle(1, 0x666666);
+      this.inventoryContainer.add(slot);
+      this.inventorySlots.push({ x, y });
+    }
+
     this.refreshInventory();
   }
 
+  toggleInventory() {
+    this.isInventoryOpen = !this.isInventoryOpen;
+    this.inventoryContainer.setVisible(this.isInventoryOpen);
+    if (this.isInventoryOpen) {
+      this.refreshInventory();
+    }
+  }
+
   refreshInventory() {
-    this.inventoryContainer.removeAll(true);
-    let yOffset = 0;
+    this.inventoryContainer.each((child) => {
+      if (child.name === 'itemIcon') child.destroy();
+    });
+
+    let slotIndex = 0;
 
     INVENTORY_ITEMS.forEach((item) => {
-      if (this.registry.get(item.regKey)) {
-        const itemIcon = this.add
-          .text(0, yOffset, this.getText(item.label), {
-            fontSize: '18px',
-            fill: item.color,
-            backgroundColor: '#000000aa',
-            padding: { x: 8, y: 4 },
-          })
-          .setOrigin(1, 0);
+      if (
+        this.registry.get(item.regKey) &&
+        slotIndex < this.inventorySlots.length
+      ) {
+        const slot = this.inventorySlots[slotIndex];
 
-        itemIcon.setName(item.id);
-        itemIcon.setData('localeKey', item.label);
+        const icon = this.add.image(slot.x, slot.y, item.texture, item.frame);
+        icon.setDisplaySize(32, 32);
+        icon.setName('itemIcon');
+        this.inventoryContainer.add(icon);
 
-        this.inventoryContainer.add(itemIcon);
-        yOffset += 35;
+        slotIndex++;
       }
     });
   }
@@ -200,10 +247,7 @@ export default class UIScene extends Phaser.Scene {
   updateUITexts() {
     this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
 
-    this.inventoryContainer.each((icon) => {
-      const key = icon.getData('localeKey');
-      if (key) icon.setText(this.getText(key));
-    });
+    // TODO: Update tooltips for inventory items
 
     if (this.gameOverText) this.gameOverText.setText(this.getText('uiYouDied'));
     if (this.finalScoreText)
@@ -270,10 +314,9 @@ export default class UIScene extends Phaser.Scene {
         item.event,
         () => {
           this.refreshInventory();
-
-          const itemIcon = this.inventoryContainer.getByName(item.id);
-          if (itemIcon) {
-            this.pulseIcon(itemIcon);
+          // If the inventory is closed, show a notification
+          if (!this.isInventoryOpen) {
+             // this.showNotification(...)
           }
         },
         this,
@@ -329,6 +372,7 @@ export default class UIScene extends Phaser.Scene {
     });
   }
 
+  // Deprecated
   pulseIcon(target) {
     target.setAlpha(1);
     this.tweens.add({
