@@ -34,51 +34,68 @@ export class CombatHelper {
     return hitbox;
   }
 
+  static showAttackEffect(scene, x, y, direction) {
+      let swordX = x;
+      let swordY = y;
+      let angle = 0;
+
+      switch (direction) {
+        case 'left':
+          swordX -= 16;
+          angle = -90;
+          break;
+        case 'right':
+          swordX += 16;
+          angle = 90;
+          break;
+        case 'up':
+          swordY -= 16;
+          angle = 0;
+          break;
+        case 'down':
+          swordY += 16;
+          angle = 180;
+          break;
+      }
+
+      const sword = scene.add.sprite(swordX, swordY, 'player_sheet', 103);
+      sword.setDepth(10);
+      sword.setAngle(angle);
+
+      scene.tweens.add({
+          targets: sword,
+          alpha: 0,
+          scale: 1.5,
+          duration: 150,
+          onComplete: () => {
+              sword.destroy();
+          }
+      });
+  }
+
   /**
    * Sets up the combat system for the scene
    */
   static setupCombatSystem(scene, enemies, onKill) {
-    scene.events.off('player-attack');
-    const attackHandler = (x, y, direction) => {
-      if (!scene.scene.isActive()) {
-        console.warn('Scene not active, ignoring attack');
-        return;
-      }
-
-      if (!enemies || !enemies.children || enemies.children.size === 0) {
-        console.warn('No enemies to attack');
-        return;
-      }
+    const onAttack = (x, y, direction) => {
       const hitbox = CombatHelper.createAttackHitbox(scene, x, y, direction);
-      const overlapCollider = scene.physics.add.overlap(
-        hitbox,
-        enemies,
-        (sword, enemy) => {
-          if (enemy && enemy.active) {
-            enemy.disableBody(true, true);
-            if (onKill) {
-              onKill();
-            }
-          }
-        },
-      );
+      
+      CombatHelper.showAttackEffect(scene, x, y, direction);
+
+      scene.physics.overlap(hitbox, enemies, (sword, enemy) => {
+        enemy.disableBody(true, true);
+        if (onKill) onKill();
+      });
+
       scene.time.delayedCall(50, () => {
-        if (overlapCollider) {
-          scene.physics.world.removeCollider(overlapCollider);
-        }
-        if (hitbox && hitbox.active) {
-          hitbox.destroy();
-        }
+          if (hitbox.active) hitbox.destroy();
       });
     };
 
-    scene.events.on('player-attack', attackHandler);
-    scene.events.once('shutdown', () => {
-      scene.events.off('player-attack', attackHandler);
-    });
+    scene.events.on('player-attack', onAttack);
 
-    scene.events.once('destroy', () => {
-      scene.events.off('player-attack', attackHandler);
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+        scene.events.off('player-attack', onAttack);
     });
   }
 }
