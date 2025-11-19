@@ -15,8 +15,16 @@ export default class UIScene extends Phaser.Scene {
 
   gameScenes = ['GameScene', 'ForestScene'];
 
+  initialIsEvening = false;
+  initialAnimated = false;
+
   constructor() {
     super('UIScene');
+  }
+
+  init(data) {
+    this.initialIsEvening = data?.isEvening || false;
+    this.initialAnimated = data?.animated !== undefined ? data.animated : false;
   }
 
   create() {
@@ -74,6 +82,10 @@ export default class UIScene extends Phaser.Scene {
     this.darknessOverlay.setOrigin(0, 0);
     this.darknessOverlay.setAlpha(0);
     this.darknessOverlay.setDepth(-1);
+
+    if (this.initialIsEvening) {
+      this.darknessOverlay.setAlpha(0.3);
+    }
 
     // Connect Events
     this.gameScenes.forEach((sceneKey) => {
@@ -141,16 +153,20 @@ export default class UIScene extends Phaser.Scene {
     this.dialogText.setVisible(false);
   }
 
-  handleSetTime(time) {
+  handleSetTime(time, animated = true) {
     let targetAlpha = 0;
     if (time === 'dusk') targetAlpha = 0.3;
     if (time === 'night') targetAlpha = 0.7;
 
-    this.tweens.add({
-      targets: this.darknessOverlay,
-      alpha: targetAlpha,
-      duration: 2000,
-    });
+    if (animated) {
+      this.tweens.add({
+        targets: this.darknessOverlay,
+        alpha: targetAlpha,
+        duration: 2000,
+      });
+    } else {
+      this.darknessOverlay.setAlpha(targetAlpha);
+    }
   }
 
   handlePlayerHit() {

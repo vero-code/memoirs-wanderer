@@ -27,9 +27,6 @@ export default class ForestScene extends Phaser.Scene {
 
   loadGameState() {
     this.isEvening = this.registry.get('isEvening') || false;
-    console.log('🌲 ForestScene - Loaded state:', {
-      isEvening: this.isEvening,
-    });
   }
 
   createWorld() {
@@ -108,7 +105,10 @@ export default class ForestScene extends Phaser.Scene {
   }
 
   setupUI() {
-    this.scene.launch('UIScene');
+    this.scene.launch('UIScene', {
+      isEvening: this.isEvening,
+      animated: false,
+    });
 
     const uiScene = this.scene.get('UIScene');
     this.events.on('player-hit', () => {
@@ -119,11 +119,8 @@ export default class ForestScene extends Phaser.Scene {
   applyTimeOfDay() {
     if (this.isEvening) {
       this.time.delayedCall(100, () => {
-        console.log('🌆 ForestScene - Setting dusk');
-        this.events.emit('set-time', 'dusk');
+        this.events.emit('set-time', 'dusk', false);
       });
-    } else {
-      console.log('☀️ ForestScene - Daytime');
     }
   }
 
@@ -134,7 +131,6 @@ export default class ForestScene extends Phaser.Scene {
     exitZone.body.moves = false;
 
     this.physics.add.overlap(this.player, exitZone, () => {
-      console.log('Returning to City...');
       this.scene.stop('UIScene');
       this.scene.start('GameScene', { fromForest: true });
     });

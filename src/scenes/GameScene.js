@@ -132,22 +132,22 @@ export default class GameScene extends Phaser.Scene {
 
     // Exit zone overlap
     this.physics.add.overlap(this.player, this.exitZone, () => {
-      console.log('Leaving the city...');
       this.scene.stop('UIScene');
       this.scene.start('ForestScene');
     });
 
     this.scene.launch('UIScene');
-    this.applyTimeOfDay();
+
+    this.scene.launch('UIScene', {
+      isEvening: this.isEvening,
+      animated: false,
+    });
   }
 
-  applyTimeOfDay() {
-    if (this.isEvening) {
-      this.time.delayedCall(100, () => {
-        console.log('🌆 Applying time: dusk');
-        this.events.emit('set-time', 'dusk');
-      });
-    }
+  setEveningFirstTime() {
+    this.isEvening = true;
+    this.registry.set('isEvening', true);
+    this.events.emit('set-time', 'dusk', true);
   }
 
   update(time, delta) {
@@ -181,7 +181,6 @@ export default class GameScene extends Phaser.Scene {
         this.hasDiary = true;
         this.justGotDiary = true;
         this.registry.set('hasDiary', true);
-        console.log('Diary received.');
         this.events.emit('get-diary');
       }
       let text = this.justGotDiary
@@ -194,7 +193,6 @@ export default class GameScene extends Phaser.Scene {
         this.hasArmor = true;
         this.justGotArmor = true;
         this.registry.set('hasArmor', true);
-        console.log('Armor received.');
         this.events.emit('get-armor');
       }
       let text = this.justGotArmor
@@ -207,13 +205,10 @@ export default class GameScene extends Phaser.Scene {
         this.hasPotato = true;
         this.justGotPotato = true;
         this.registry.set('hasPotato', true);
-        console.log('Potato received.');
         this.events.emit('get-potato');
 
         if (!this.isEvening) {
-          this.isEvening = true;
-          this.registry.set('isEvening', true);
-          this.applyTimeOfDay();
+          this.setEveningFirstTime();
         }
       }
       let text = this.justGotPotato
@@ -231,9 +226,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   setEvening() {
-    console.log('🌅 Setting evening for the first time');
     this.isEvening = true;
     this.registry.set('isEvening', true);
-    this.events.emit('set-time', 'dusk');
+    this.events.emit('set-time', 'dusk', true);
   }
 }
