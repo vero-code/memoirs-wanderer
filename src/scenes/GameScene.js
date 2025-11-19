@@ -40,6 +40,11 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
+  getText(key) {
+    const localeData = this.registry.get('locale_data');
+    return localeData ? localeData[key] : key;
+  }
+
   create() {
     this.loadGameState();
     this.createWorld();
@@ -49,6 +54,12 @@ export default class GameScene extends Phaser.Scene {
     this.setupCollisions();
     this.setupExitZone();
     this.setupUI();
+
+    this.events.on('language-changed', () => {
+      if (this.activeNPC === 'writer') this.handleWriterInteraction();
+      else if (this.activeNPC === 'armorer') this.handleArmorerInteraction();
+      else if (this.activeNPC === 'merchant') this.handleMerchantInteraction();
+    });
   }
 
   loadGameState() {
@@ -190,8 +201,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     const text = this.justGotDiary
-      ? 'Writer: "Hello! Take this diary..."'
-      : 'Writer: "Good luck! Don\'t forget to write."';
+      ? this.getText('writerHello')
+      : this.getText('writerGoodbye');
 
     this.events.emit('show-dialog', text);
     this.activeNPC = 'writer';
@@ -206,8 +217,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     const text = this.justGotArmor
-      ? 'Armorer: "Dangerous out there. Take this armor!"'
-      : 'Armorer: "Stay safe, traveler."';
+      ? this.getText('armorerHello')
+      : this.getText('armorerGoodbye');
 
     this.events.emit('show-dialog', text);
     this.activeNPC = 'armorer';
@@ -226,8 +237,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     const text = this.justGotPotato
-      ? 'Merchant: "Fresh potatoes! Best price!"'
-      : 'Merchant: "Come back if you get hungry."';
+      ? this.getText('merchantHello')
+      : this.getText('merchantGoodbye');
 
     this.events.emit('show-dialog', text);
     this.activeNPC = 'merchant';

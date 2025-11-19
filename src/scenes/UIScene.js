@@ -10,7 +10,11 @@ export default class UIScene extends Phaser.Scene {
   darknessOverlay;
   healthDisplay;
   scoreText;
+  langButton;
   score = 0;
+  gameOverText;
+  finalScoreText;
+  restartButton;
 
   gameScenes = ['GameScene', 'ForestScene'];
 
@@ -32,6 +36,7 @@ export default class UIScene extends Phaser.Scene {
     this.createHealthDisplay();
     this.createIcons();
     this.restoreInventoryUI();
+    this.createLanguageButton();
     this.createDarknessOverlay();
     this.applyInitialTimeOfDay();
     this.connectGameSceneEvents();
@@ -39,6 +44,9 @@ export default class UIScene extends Phaser.Scene {
 
   resetState() {
     this.score = 0;
+    this.gameOverText = null;
+    this.finalScoreText = null;
+    this.restartButton = null;
   }
 
   createUI() {
@@ -73,13 +81,13 @@ export default class UIScene extends Phaser.Scene {
   }
 
   createIcons() {
-    this.diaryIcon = this.createIcon(650, '📔 Diary', '#FFFF00');
-    this.armorIcon = this.createIcon(510, '🛡️ Armor', '#00FFFF');
-    this.potatoIcon = this.createIcon(370, '🥔 Potato', '#FFA500');
+    this.diaryIcon = this.createIcon(650, 'uiDiary', '#FFFF00');
+    this.armorIcon = this.createIcon(510, 'uiArmor', '#00FFFF');
+    this.potatoIcon = this.createIcon(370, 'uiPotato', '#FFA500');
   }
 
-  createIcon(x, text, color) {
-    const icon = this.add.text(x, 20, text, {
+  createIcon(x, key, color) {
+    const icon = this.add.text(x, 20, this.getText(key), {
       fontSize: '20px',
       fill: color,
       backgroundColor: '#000000aa',
@@ -88,6 +96,7 @@ export default class UIScene extends Phaser.Scene {
     icon.setVisible(false);
     icon.setAlpha(1);
     icon.setDepth(10);
+    icon.localeKey = key;
     return icon;
   }
 
@@ -104,6 +113,74 @@ export default class UIScene extends Phaser.Scene {
       this.potatoIcon.setVisible(true);
       this.potatoIcon.setAlpha(1);
     }
+  }
+
+  getText(key) {
+    const localeData = this.registry.get('locale_data');
+    return localeData ? localeData[key] : key;
+  }
+
+  createLanguageButton() {
+    const currentLang = this.registry.get('current_lang') || 'en';
+    this.langButton = this.add
+      .text(750, 570, currentLang.toUpperCase(), {
+        fontSize: '24px',
+        fill: '#ffffff',
+        backgroundColor: '#333333',
+        padding: { x: 10, y: 5 },
+        fixedWidth: 40,
+        align: 'center',
+      })
+      .setOrigin(1, 1)
+      .setDepth(100)
+      .setInteractive({ useHandCursor: true });
+
+    this.langButton.on('pointerdown', () => {
+      this.toggleLanguage();
+    });
+    this.langButton.on('pointerover', () =>
+      this.langButton.setStyle({ fill: '#ffff00' }),
+    );
+    this.langButton.on('pointerout', () =>
+      this.langButton.setStyle({ fill: '#ffffff' }),
+    );
+  }
+
+  toggleLanguage() {
+    const current = this.registry.get('current_lang');
+    const next = current === 'en' ? 'ru' : 'en';
+    this.registry.set('current_lang', next);
+    const newData = this.cache.json.get(`locale_${next}`);
+    this.registry.set('locale_data', newData);
+
+    this.langButton.setText(next.toUpperCase());
+    this.updateUITexts();
+
+    this.gameScenes.forEach((key) => {
+      const scene = this.scene.get(key);
+      if (scene) {
+        scene.events.emit('language-changed');
+      }
+    });
+  }
+
+  updateUITexts() {
+    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
+
+    if (this.diaryIcon)
+      this.diaryIcon.setText(this.getText(this.diaryIcon.localeKey));
+    if (this.armorIcon)
+      this.armorIcon.setText(this.getText(this.armorIcon.localeKey));
+    if (this.potatoIcon)
+      this.potatoIcon.setText(this.getText(this.potatoIcon.localeKey));
+
+    if (this.gameOverText) this.gameOverText.setText(this.getText('uiYouDied'));
+    if (this.finalScoreText)
+      this.finalScoreText.setText(
+        `${this.getText('uiFinalScore')}${this.score}`,
+      );
+    if (this.restartButton)
+      this.restartButton.setText(this.getText('uiRestart'));
   }
 
   createDarknessOverlay() {
@@ -192,7 +269,7 @@ export default class UIScene extends Phaser.Scene {
 
   handleEnemyKilled() {
     this.score += 100;
-    this.scoreText.setText(`💀 Score: ${this.score}`);
+    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
     this.animateScoreIncrease();
   }
 
@@ -211,9 +288,8 @@ export default class UIScene extends Phaser.Scene {
   }
 
   createGameOverScreen() {
-    // Game Over Title
-    const gameOverText = this.add
-      .text(400, 250, 'YOU DIED', {
+    this.gameOverText = this.add
+      .text(400, 250, this.getText('uiYouDied'), {
         fontSize: '64px',
         fill: '#ff0000',
         align: 'center',
@@ -223,9 +299,16 @@ export default class UIScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(200);
 
-    // Restart Button
-    const restartButton = this.add
-      .text(400, 350, '💀 RESTART (Press R)', {
+    this.finalScoreText = this.add
+      .text(400, 320, `${this.getText('uiFinalScore')}${this.score}`, {
+        fontSize: '32px',
+        fill: '#ffffff',
+      })
+      .setOrigin(0.5)
+      .setDepth(200);
+
+    this.restartButton = this.add
+      .text(400, 400, this.getText('uiRestart'), {
         fontSize: '32px',
         fill: '#ffffff',
         backgroundColor: '#333333',
@@ -235,7 +318,7 @@ export default class UIScene extends Phaser.Scene {
       .setDepth(200)
       .setInteractive({ useHandCursor: true });
 
-    this.setupRestartButton(restartButton);
+    this.setupRestartButton(this.restartButton);
     this.setupRestartKeyboard();
   }
 

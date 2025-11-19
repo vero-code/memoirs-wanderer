@@ -1,4 +1,16 @@
 {
-    "gameStart": "The Game Begins!",
-    "switchLang": "Переключить на Русский"
+  "gameStart": "The Game Begins!",
+  "writerHello": "Writer: \"Hello! Take this diary...\"",
+  "writerGoodbye": "Writer: \"Good luck! Don't forget to write.\"",
+  "armorerHello": "Armorer: \"Dangerous out there. Take this armor!\"",
+  "armorerGoodbye": "Armorer: \"Stay safe, traveler.\"",
+  "merchantHello": "Merchant: \"Fresh potatoes! Best price!\"",
+  "merchantGoodbye": "Merchant: \"Come back if you get hungry.\"",
+  "uiScore": "💀 Score: ",
+  "uiDiary": "📔 Diary",
+  "uiArmor": "🛡️ Armor",
+  "uiPotato": "🥔 Potato",
+  "uiYouDied": "YOU DIED",
+  "uiRestart": "💀 RESTART (Press R)",
+  "uiFinalScore": "Final Score: "
 }
