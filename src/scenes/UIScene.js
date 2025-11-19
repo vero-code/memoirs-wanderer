@@ -7,27 +7,21 @@ const INVENTORY_ITEMS = [
     id: 'diary',
     regKey: 'hasDiary',
     label: 'uiDiary',
-    texture: 'town_sheet',
-    frame: 10,
-    color: '#FFFF00',
+    emoji: '📔',
     event: 'get-diary',
   },
   {
     id: 'armor',
     regKey: 'hasArmor',
     label: 'uiArmor',
-    texture: 'town_sheet',
-    frame: 5,
-    color: '#00FFFF',
+    emoji: '🛡️',
     event: 'get-armor',
   },
   {
     id: 'potato',
     regKey: 'hasPotato',
     label: 'uiPotato',
-    texture: 'town_sheet',
-    frame: 25,
-    color: '#FFA500',
+    emoji: '🥔',
     event: 'get-potato',
   },
 ];
@@ -46,6 +40,7 @@ export default class UIScene extends Phaser.Scene {
 
   // Inventory
   inventoryContainer;
+  backpackContainer;
   isInventoryOpen = false;
   inventorySlots = [];
 
@@ -70,6 +65,7 @@ export default class UIScene extends Phaser.Scene {
     this.createUI();
     this.createHealthDisplay();
 
+    this.createBackpackButton();
     this.createInventorySystem();
 
     this.createLanguageButton();
@@ -131,7 +127,38 @@ export default class UIScene extends Phaser.Scene {
     this.healthDisplay = new HealthDisplay(this, 3);
   }
 
-  // --- NEW INVENTORY SYSTEM ---
+  // --- BACKPACK BUTTON ---
+
+  createBackpackButton() {
+    this.backpackContainer = this.add.container(755, 35);
+    this.backpackContainer.setDepth(95);
+
+    const bg = this.add.circle(0, 0, 25, 0x000000, 0.6);
+    bg.setStrokeStyle(2, 0x888888);
+    bg.setInteractive({ useHandCursor: true });
+    bg.on('pointerdown', () => this.toggleInventory());
+
+    const icon = this.add.text(0, 0, '🎒', { fontSize: '30px' }).setOrigin(0.5);
+
+    this.backpackContainer.add([bg, icon]);
+    bg.on('pointerover', () => bg.setStrokeStyle(2, 0xffff00));
+    bg.on('pointerout', () => bg.setStrokeStyle(2, 0x888888));
+  }
+
+  pulseBackpack() {
+    if (!this.backpackContainer) return;
+
+    this.tweens.add({
+      targets: this.backpackContainer,
+      scale: 1.3,
+      duration: 150,
+      yoyo: true,
+      repeat: 3,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  // --- INVENTORY SYSTEM (GRID) ---
 
   createInventorySystem() {
     this.inventoryContainer = this.add.container(400, 300);
@@ -143,7 +170,11 @@ export default class UIScene extends Phaser.Scene {
     this.inventoryContainer.add(bg);
 
     const title = this.add
-      .text(0, -80, 'INVENTORY', { fontSize: '20px', fontStyle: 'bold' })
+      .text(0, -80, 'INVENTORY', {
+        fontSize: '22px',
+        fontStyle: 'bold',
+        fill: '#ffffff',
+      })
       .setOrigin(0.5);
     this.inventoryContainer.add(title);
 
@@ -188,8 +219,10 @@ export default class UIScene extends Phaser.Scene {
       ) {
         const slot = this.inventorySlots[slotIndex];
 
-        const icon = this.add.image(slot.x, slot.y, item.texture, item.frame);
-        icon.setDisplaySize(32, 32);
+        const icon = this.add.text(slot.x, slot.y, item.emoji, { 
+            fontSize: '32px',
+            padding: { x:0, y:0 }
+        }).setOrigin(0.5);
         icon.setName('itemIcon');
         this.inventoryContainer.add(icon);
 
@@ -314,9 +347,10 @@ export default class UIScene extends Phaser.Scene {
         item.event,
         () => {
           this.refreshInventory();
-          // If the inventory is closed, show a notification
+
+          // If the inventory is closed, flash the backpack
           if (!this.isInventoryOpen) {
-             // this.showNotification(...)
+            this.pulseBackpack();
           }
         },
         this,
@@ -387,7 +421,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   // --- GAME OVER LOGIC ---
-  
+
   triggerGameOver() {
     this.createGameOverScreen();
     this.pauseGameScenes();
