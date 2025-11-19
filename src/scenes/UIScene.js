@@ -51,6 +51,14 @@ export default class UIScene extends Phaser.Scene {
     this.gameScenes.forEach((sceneKey) => {
       const scene = this.scene.get(sceneKey);
       if (scene) {
+        scene.events.off('show-dialog');
+        scene.events.off('hide-dialog');
+        scene.events.off('get-diary');
+        scene.events.off('get-armor');
+        scene.events.off('get-potato');
+        scene.events.off('set-time');
+        scene.events.off('player-hit');
+
         scene.events.on('show-dialog', this.handleShowDialog, this);
         scene.events.on('hide-dialog', this.handleHideDialog, this);
         scene.events.on(
@@ -71,21 +79,6 @@ export default class UIScene extends Phaser.Scene {
         scene.events.on('set-time', this.handleSetTime, this);
         scene.events.on('player-hit', this.handlePlayerHit, this);
       }
-    });
-
-    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.gameScenes.forEach((sceneKey) => {
-        const scene = this.scene.get(sceneKey);
-        if (scene) {
-          scene.events.off('show-dialog');
-          scene.events.off('hide-dialog');
-          scene.events.off('get-diary');
-          scene.events.off('get-armor');
-          scene.events.off('get-potato');
-          scene.events.off('set-time');
-          scene.events.off('player-hit');
-        }
-      });
     });
   }
 
@@ -133,31 +126,63 @@ export default class UIScene extends Phaser.Scene {
             heartToRemove.destroy();
           },
         });
-      } else {
-        console.error(
-          `UIScene: Error! Heart visual not found for index ${this.currentHealth}`,
-        );
       }
 
       if (this.currentHealth <= 0) {
-        const gameOverText = this.add
-          .text(400, 300, 'YOU DIED\nPress F5 to Restart', {
-            fontSize: '64px',
-            fill: '#ff0000',
-            align: 'center',
-            backgroundColor: '#000000aa',
-          })
-          .setOrigin(0.5)
-          .setDepth(200);
-
-        this.gameScenes.forEach((key) => {
-          const s = this.scene.get(key);
-          if (s.scene.isActive()) s.scene.pause();
-        });
+        this.triggerGameOver();
       }
-    } else {
-      console.log('UIScene: Health is already 0, ignoring hit');
     }
+  }
+
+  triggerGameOver() {
+    const gameOverText = this.add
+      .text(400, 250, 'YOU DIED', {
+        fontSize: '64px',
+        fill: '#ff0000',
+        align: 'center',
+        stroke: '#000000',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5)
+      .setDepth(200);
+
+    const restartButton = this.add
+      .text(400, 350, '💀 RESTART (Press R)', {
+        fontSize: '32px',
+        fill: '#ffffff',
+        backgroundColor: '#333333',
+        padding: { x: 20, y: 10 },
+      })
+      .setOrigin(0.5)
+      .setDepth(200)
+      .setInteractive({ useHandCursor: true });
+
+    restartButton.on('pointerover', () =>
+      restartButton.setStyle({ fill: '#ffff00' }),
+    );
+    restartButton.on('pointerout', () =>
+      restartButton.setStyle({ fill: '#ffffff' }),
+    );
+
+    restartButton.on('pointerdown', () => {
+      this.restartGame();
+    });
+
+    this.input.keyboard.once('keydown-R', () => {
+      this.restartGame();
+    });
+
+    this.gameScenes.forEach((key) => {
+      const s = this.scene.get(key);
+      if (s.scene.isActive()) s.scene.pause();
+    });
+  }
+
+  restartGame() {
+    this.gameScenes.forEach((key) => {
+      this.scene.stop(key);
+    });
+    this.scene.start('GameScene');
   }
 
   createIcon(x, text, color) {
