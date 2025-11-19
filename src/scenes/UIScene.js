@@ -28,10 +28,23 @@ export default class UIScene extends Phaser.Scene {
   }
 
   create() {
+    this.resetState();
+    this.createUI();
+    this.createHearts();
+    this.createIcons();
+    this.restoreInventoryUI();
+    this.createDarknessOverlay();
+    this.applyInitialTimeOfDay();
+    this.connectGameSceneEvents();
+  }
+
+  resetState() {
     this.hearts = [];
     this.currentHealth = this.maxHealth;
     this.score = 0;
+  }
 
+  createUI() {
     // Dialog text
     this.dialogText = this.add
       .text(400, 550, '', {
@@ -46,6 +59,7 @@ export default class UIScene extends Phaser.Scene {
     this.dialogText.setVisible(false);
     this.dialogText.setDepth(100);
 
+    // Score text
     this.scoreText = this.add
       .text(400, 20, '💀 Score: 0', {
         fontSize: '24px',
@@ -55,15 +69,36 @@ export default class UIScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0);
     this.scoreText.setDepth(100);
+  }
 
-    this.createHearts();
+  createHearts() {
+    for (let i = 0; i < this.maxHealth; i++) {
+      const heart = this.add.text(20 + i * 30, 20, '❤️', { fontSize: '24px' });
+      heart.setDepth(10);
+      this.hearts.push(heart);
+    }
+  }
 
-    // Icons
+  createIcons() {
     this.diaryIcon = this.createIcon(650, '📔 Diary', '#FFFF00');
     this.armorIcon = this.createIcon(510, '🛡️ Armor', '#00FFFF');
     this.potatoIcon = this.createIcon(370, '🥔 Potato', '#FFA500');
+  }
 
-    // Restore Inventory UI
+  createIcon(x, text, color) {
+    const icon = this.add.text(x, 20, text, {
+      fontSize: '20px',
+      fill: color,
+      backgroundColor: '#000000aa',
+      padding: { x: 10, y: 5 },
+    });
+    icon.setVisible(false);
+    icon.setAlpha(1);
+    icon.setDepth(10);
+    return icon;
+  }
+
+  restoreInventoryUI() {
     if (this.registry.get('hasDiary')) {
       this.diaryIcon.setVisible(true);
       this.diaryIcon.setAlpha(1);
@@ -76,72 +111,51 @@ export default class UIScene extends Phaser.Scene {
       this.potatoIcon.setVisible(true);
       this.potatoIcon.setAlpha(1);
     }
+  }
 
-    // Darkness overlay
-    this.darknessOverlay = this.add.rectangle(0, 0, 800, 600, 0x000022); // Dark blue tint
+  createDarknessOverlay() {
+    this.darknessOverlay = this.add.rectangle(0, 0, 800, 600, 0x000022);
     this.darknessOverlay.setOrigin(0, 0);
     this.darknessOverlay.setAlpha(0);
     this.darknessOverlay.setDepth(-1);
+  }
 
+  applyInitialTimeOfDay() {
     if (this.initialIsEvening) {
       this.darknessOverlay.setAlpha(0.3);
     }
+  }
 
-    // Connect Events
+  connectGameSceneEvents() {
     this.gameScenes.forEach((sceneKey) => {
       const scene = this.scene.get(sceneKey);
       if (scene) {
-        scene.events.off('show-dialog');
-        scene.events.off('hide-dialog');
-        scene.events.off('get-diary');
-        scene.events.off('get-armor');
-        scene.events.off('get-potato');
-        scene.events.off('set-time');
-        scene.events.off('player-hit');
-        scene.events.off('enemy-killed');
-
-        scene.events.on('show-dialog', this.handleShowDialog, this);
-        scene.events.on('hide-dialog', this.handleHideDialog, this);
-        scene.events.on(
-          'get-diary',
-          () => this.pulseIcon(this.diaryIcon),
-          this,
-        );
-        scene.events.on(
-          'get-armor',
-          () => this.pulseIcon(this.armorIcon),
-          this,
-        );
-        scene.events.on(
-          'get-potato',
-          () => this.pulseIcon(this.potatoIcon),
-          this,
-        );
-        scene.events.on('set-time', this.handleSetTime, this);
-        scene.events.on('player-hit', this.handlePlayerHit, this);
-        scene.events.on('enemy-killed', this.handleEnemyKilled, this);
+        this.disconnectSceneEvents(scene);
+        this.connectSceneEvents(scene);
       }
     });
   }
 
-  handleEnemyKilled() {
-    this.score += 100;
-    this.scoreText.setText(`💀 Score: ${this.score}`);
-
-    this.tweens.add({
-      targets: this.scoreText,
-      scale: 1.2,
-      duration: 100,
-      yoyo: true,
-    });
+  disconnectSceneEvents(scene) {
+    scene.events.off('show-dialog');
+    scene.events.off('hide-dialog');
+    scene.events.off('get-diary');
+    scene.events.off('get-armor');
+    scene.events.off('get-potato');
+    scene.events.off('set-time');
+    scene.events.off('player-hit');
+    scene.events.off('enemy-killed');
   }
 
-  createHearts() {
-    for (let i = 0; i < this.maxHealth; i++) {
-      const heart = this.add.text(20 + i * 30, 20, '❤️', { fontSize: '24px' });
-      heart.setDepth(10);
-      this.hearts.push(heart);
-    }
+  connectSceneEvents(scene) {
+    scene.events.on('show-dialog', this.handleShowDialog, this);
+    scene.events.on('hide-dialog', this.handleHideDialog, this);
+    scene.events.on('get-diary', () => this.pulseIcon(this.diaryIcon), this);
+    scene.events.on('get-armor', () => this.pulseIcon(this.armorIcon), this);
+    scene.events.on('get-potato', () => this.pulseIcon(this.potatoIcon), this);
+    scene.events.on('set-time', this.handleSetTime, this);
+    scene.events.on('player-hit', this.handlePlayerHit, this);
+    scene.events.on('enemy-killed', this.handleEnemyKilled, this);
   }
 
   handleShowDialog(text) {
@@ -175,15 +189,7 @@ export default class UIScene extends Phaser.Scene {
 
       const heartToRemove = this.hearts[this.currentHealth];
       if (heartToRemove) {
-        this.tweens.add({
-          targets: heartToRemove,
-          alpha: 0,
-          scale: 0,
-          duration: 200,
-          onComplete: () => {
-            heartToRemove.destroy();
-          },
-        });
+        this.animateHeartRemoval(heartToRemove);
       }
 
       if (this.currentHealth <= 0) {
@@ -192,7 +198,40 @@ export default class UIScene extends Phaser.Scene {
     }
   }
 
+  animateHeartRemoval(heart) {
+    this.tweens.add({
+      targets: heart,
+      alpha: 0,
+      scale: 0,
+      duration: 200,
+      onComplete: () => {
+        heart.destroy();
+      },
+    });
+  }
+
+  handleEnemyKilled() {
+    this.score += 100;
+    this.scoreText.setText(`💀 Score: ${this.score}`);
+    this.animateScoreIncrease();
+  }
+
+  animateScoreIncrease() {
+    this.tweens.add({
+      targets: this.scoreText,
+      scale: 1.2,
+      duration: 100,
+      yoyo: true,
+    });
+  }
+
   triggerGameOver() {
+    this.createGameOverScreen();
+    this.pauseGameScenes();
+  }
+
+  createGameOverScreen() {
+    // Game Over Title
     const gameOverText = this.add
       .text(400, 250, 'YOU DIED', {
         fontSize: '64px',
@@ -204,6 +243,7 @@ export default class UIScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(200);
 
+    // Restart Button
     const restartButton = this.add
       .text(400, 350, '💀 RESTART (Press R)', {
         fontSize: '32px',
@@ -215,50 +255,56 @@ export default class UIScene extends Phaser.Scene {
       .setDepth(200)
       .setInteractive({ useHandCursor: true });
 
-    restartButton.on('pointerover', () =>
-      restartButton.setStyle({ fill: '#ffff00' }),
-    );
-    restartButton.on('pointerout', () =>
-      restartButton.setStyle({ fill: '#ffffff' }),
-    );
+    this.setupRestartButton(restartButton);
+    this.setupRestartKeyboard();
+  }
 
-    restartButton.on('pointerdown', () => {
-      this.restartGame();
+  setupRestartButton(button) {
+    button.on('pointerover', () => {
+      button.setStyle({ fill: '#ffff00' });
     });
 
+    button.on('pointerout', () => {
+      button.setStyle({ fill: '#ffffff' });
+    });
+
+    button.on('pointerdown', () => {
+      this.restartGame();
+    });
+  }
+
+  setupRestartKeyboard() {
     this.input.keyboard.once('keydown-R', () => {
       this.restartGame();
     });
+  }
 
+  pauseGameScenes() {
     this.gameScenes.forEach((key) => {
-      const s = this.scene.get(key);
-      if (s.scene.isActive()) s.scene.pause();
+      const scene = this.scene.get(key);
+      if (scene && scene.scene.isActive()) {
+        scene.scene.pause();
+      }
     });
   }
 
   restartGame() {
+    this.clearGameState();
+    this.stopAllGameScenes();
+    this.scene.start('GameScene');
+  }
+
+  clearGameState() {
     this.registry.set('hasDiary', false);
     this.registry.set('hasArmor', false);
     this.registry.set('hasPotato', false);
     this.registry.set('isEvening', false);
+  }
 
+  stopAllGameScenes() {
     this.gameScenes.forEach((key) => {
       this.scene.stop(key);
     });
-    this.scene.start('GameScene');
-  }
-
-  createIcon(x, text, color) {
-    const icon = this.add.text(x, 20, text, {
-      fontSize: '20px',
-      fill: color,
-      backgroundColor: '#000000aa',
-      padding: { x: 10, y: 5 },
-    });
-    icon.setVisible(false);
-    icon.setAlpha(1);
-    icon.setDepth(10);
-    return icon;
   }
 
   pulseIcon(target) {
