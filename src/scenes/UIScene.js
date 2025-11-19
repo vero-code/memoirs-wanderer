@@ -55,6 +55,7 @@ export default class UIScene extends Phaser.Scene {
     this.armorIcon = this.createIcon(510, '🛡️ Armor', '#00FFFF');
     this.potatoIcon = this.createIcon(370, '🥔 Potato', '#FFA500');
 
+    // Restore Inventory UI
     if (this.registry.get('hasDiary')) {
       this.diaryIcon.setVisible(true);
       this.diaryIcon.setAlpha(1);
@@ -74,6 +75,7 @@ export default class UIScene extends Phaser.Scene {
     this.darknessOverlay.setAlpha(0);
     this.darknessOverlay.setDepth(-1);
 
+    // Connect Events
     this.gameScenes.forEach((sceneKey) => {
       const scene = this.scene.get(sceneKey);
       if (scene) {
@@ -223,7 +225,7 @@ export default class UIScene extends Phaser.Scene {
     this.registry.set('hasArmor', false);
     this.registry.set('hasPotato', false);
     this.registry.set('isEvening', false);
-    
+
     this.gameScenes.forEach((key) => {
       this.scene.stop(key);
     });

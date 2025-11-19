@@ -6,12 +6,34 @@ import Enemy from '../entities/Enemy.js';
 export default class ForestScene extends Phaser.Scene {
   player;
   enemies;
+  isEvening = false;
 
   constructor() {
     super('ForestScene');
   }
 
   create() {
+    this.loadGameState();
+    this.createWorld();
+    this.createPlayer();
+    this.createEnemies();
+    this.setupCamera();
+    this.setupCollisions();
+    this.setupCombat();
+    this.setupUI();
+    this.applyTimeOfDay();
+    this.setupExitZone();
+  }
+
+  loadGameState() {
+    this.isEvening = this.registry.get('isEvening') || false;
+    console.log('🌲 ForestScene - Loaded state:', {
+      isEvening: this.isEvening,
+    });
+  }
+
+  createWorld() {
+    // Ground tiles
     for (let x = 0; x < 50; x++) {
       for (let y = 0; y < 50; y++) {
         this.add.image(x * 16, y * 16, 'town_sheet', 0).setOrigin(0);
@@ -20,18 +42,24 @@ export default class ForestScene extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, 800, 800);
 
-    const trees = this.physics.add.staticGroup();
+    // Trees
+    this.trees = this.physics.add.staticGroup();
     for (let i = 0; i < 50; i++) {
       const x = Phaser.Math.Between(50, 750);
       const y = Phaser.Math.Between(50, 750);
-      const tree = trees.create(x, y, 'town_sheet', 5);
+      const tree = this.trees.create(x, y, 'town_sheet', 5);
       tree.body.setSize(10, 10);
       tree.body.setOffset(3, 3);
       tree.setDepth(1);
     }
+  }
 
+  createPlayer() {
     this.player = new Player(this, 20, 100, 'player_sheet', 112);
+    this.player.setCollideWorldBounds(true);
+  }
 
+  createEnemies() {
     this.enemies = this.add.group();
     for (let i = 0; i < 3; i++) {
       const x = Phaser.Math.Between(100, 700);
@@ -39,23 +67,28 @@ export default class ForestScene extends Phaser.Scene {
       const zombie = new Enemy(this, x, y, 'player_sheet', 122, this.player);
       this.enemies.add(zombie);
     }
+  }
 
+  setupCamera() {
     this.cameras.main.startFollow(this.player);
     this.cameras.main.setZoom(2);
-    this.player.setCollideWorldBounds(true);
+  }
 
-    this.physics.add.collider(this.player, trees);
-    this.physics.add.collider(this.enemies, trees);
+  setupCollisions() {
+    this.physics.add.collider(this.player, this.trees);
+    this.physics.add.collider(this.enemies, this.trees);
     this.physics.add.collider(this.enemies, this.enemies);
-
     this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
       player.takeDamage();
     });
+  }
 
+  setupCombat() {
     this.events.on('player-attack', (x, y, direction) => {
       let hitX = x;
       let hitY = y;
       const range = 20;
+
       if (direction === 'left') hitX -= range;
       else if (direction === 'right') hitX += range;
       else if (direction === 'up') hitY -= range;
@@ -69,16 +102,32 @@ export default class ForestScene extends Phaser.Scene {
         enemy.disableBody(true, true);
         this.events.emit('enemy-killed');
       });
+
       this.time.delayedCall(50, () => swordHitbox.destroy());
     });
+  }
 
+  setupUI() {
     this.scene.launch('UIScene');
 
     const uiScene = this.scene.get('UIScene');
     this.events.on('player-hit', () => {
       uiScene.events.emit('player-hit-ui');
     });
+  }
 
+  applyTimeOfDay() {
+    if (this.isEvening) {
+      this.time.delayedCall(100, () => {
+        console.log('🌆 ForestScene - Setting dusk');
+        this.events.emit('set-time', 'dusk');
+      });
+    } else {
+      console.log('☀️ ForestScene - Daytime');
+    }
+  }
+
+  setupExitZone() {
     const exitZone = this.add.rectangle(0, 400, 20, 800, 0xff0000, 0);
     this.physics.world.enable(exitZone);
     exitZone.body.setAllowGravity(false);
