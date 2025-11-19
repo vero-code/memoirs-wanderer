@@ -26,6 +26,15 @@ export default class GameScene extends Phaser.Scene {
     super('GameScene');
   }
 
+  init(data) {
+    if (data.fromForest) {
+      this.startPosition = { x: 480, y: 165 };
+      this.armorer.setFlipX(false);
+    } else {
+      this.startPosition = { x: 110, y: 150 };
+    }
+  }
+
   create() {
     this.map = this.make.tilemap({ key: 'map_dungeon' });
     const tileset = this.map.addTilesetImage('tileset', 'tiles_dungeon');
@@ -37,7 +46,7 @@ export default class GameScene extends Phaser.Scene {
     this.layers.carts = this.map.createLayer('Carts', tileset, 0, 0);
     this.layers.carts.setDepth(3);
 
-    this.player = new Player(this, 110, 150, 'player_sheet', 112);
+    this.player = new Player(this, this.startPosition.x, this.startPosition.y, 'player_sheet', 112);
 
     // NPC
     this.writer = this.physics.add.sprite(60, 290, 'player_sheet', 99);

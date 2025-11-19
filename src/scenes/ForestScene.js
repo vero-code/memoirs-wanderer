@@ -30,7 +30,7 @@ export default class ForestScene extends Phaser.Scene {
       tree.setDepth(1);
     }
 
-    this.player = new Player(this, 15, 100, 'player_sheet', 112);
+    this.player = new Player(this, 20, 100, 'player_sheet', 112);
 
     this.enemies = this.add.group();
     for (let i = 0; i < 3; i++) {
@@ -76,6 +76,17 @@ export default class ForestScene extends Phaser.Scene {
     const uiScene = this.scene.get('UIScene');
     this.events.on('player-hit', () => {
       uiScene.events.emit('player-hit-ui');
+    });
+
+    const exitZone = this.add.rectangle(0, 400, 20, 800, 0xff0000, 0);
+    this.physics.world.enable(exitZone);
+    exitZone.body.setAllowGravity(false);
+    exitZone.body.moves = false;
+
+    this.physics.add.overlap(this.player, exitZone, () => {
+      console.log('Returning to City...');
+      this.scene.stop('UIScene');
+      this.scene.start('GameScene', { fromForest: true });
     });
   }
 
