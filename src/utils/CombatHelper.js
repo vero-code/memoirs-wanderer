@@ -40,13 +40,26 @@ export class CombatHelper {
   static setupCombatSystem(scene, enemies, onKill) {
     scene.events.on('player-attack', (x, y, direction) => {
       const hitbox = CombatHelper.createAttackHitbox(scene, x, y, direction);
-
-      scene.physics.overlap(hitbox, enemies, (sword, enemy) => {
-        enemy.disableBody(true, true);
-        if (onKill) onKill();
+      const overlapCollider = scene.physics.add.overlap(
+        hitbox,
+        enemies,
+        (sword, enemy) => {
+          if (enemy && enemy.active) {
+            enemy.disableBody(true, true);
+            if (onKill) {
+              onKill();
+            }
+          }
+        },
+      );
+      scene.time.delayedCall(50, () => {
+        if (overlapCollider) {
+          scene.physics.world.removeCollider(overlapCollider);
+        }
+        if (hitbox && hitbox.active) {
+          hitbox.destroy();
+        }
       });
-
-      scene.time.delayedCall(50, () => hitbox.destroy());
     });
   }
 }
