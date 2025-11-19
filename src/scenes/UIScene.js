@@ -1,5 +1,6 @@
 // src/scenes/UIScene.js
 import Phaser from 'phaser';
+import { HealthDisplay } from '../components/HealthDisplay.js';
 
 export default class UIScene extends Phaser.Scene {
   dialogText;
@@ -7,9 +8,7 @@ export default class UIScene extends Phaser.Scene {
   armorIcon;
   potatoIcon;
   darknessOverlay;
-  hearts = [];
-  maxHealth = 3;
-  currentHealth = 3;
+  healthDisplay;
   scoreText;
   score = 0;
 
@@ -30,7 +29,7 @@ export default class UIScene extends Phaser.Scene {
   create() {
     this.resetState();
     this.createUI();
-    this.createHearts();
+    this.createHealthDisplay();
     this.createIcons();
     this.restoreInventoryUI();
     this.createDarknessOverlay();
@@ -39,8 +38,6 @@ export default class UIScene extends Phaser.Scene {
   }
 
   resetState() {
-    this.hearts = [];
-    this.currentHealth = this.maxHealth;
     this.score = 0;
   }
 
@@ -71,12 +68,8 @@ export default class UIScene extends Phaser.Scene {
     this.scoreText.setDepth(100);
   }
 
-  createHearts() {
-    for (let i = 0; i < this.maxHealth; i++) {
-      const heart = this.add.text(20 + i * 30, 20, '❤️', { fontSize: '24px' });
-      heart.setDepth(10);
-      this.hearts.push(heart);
-    }
+  createHealthDisplay() {
+    this.healthDisplay = new HealthDisplay(this, 3);
   }
 
   createIcons() {
@@ -184,30 +177,10 @@ export default class UIScene extends Phaser.Scene {
   }
 
   handlePlayerHit() {
-    if (this.currentHealth > 0) {
-      this.currentHealth--;
-
-      const heartToRemove = this.hearts[this.currentHealth];
-      if (heartToRemove) {
-        this.animateHeartRemoval(heartToRemove);
-      }
-
-      if (this.currentHealth <= 0) {
-        this.triggerGameOver();
-      }
+    const isDead = this.healthDisplay.takeDamage();
+    if (isDead) {
+      this.triggerGameOver();
     }
-  }
-
-  animateHeartRemoval(heart) {
-    this.tweens.add({
-      targets: heart,
-      alpha: 0,
-      scale: 0,
-      duration: 200,
-      onComplete: () => {
-        heart.destroy();
-      },
-    });
   }
 
   handleEnemyKilled() {

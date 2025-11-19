@@ -2,6 +2,9 @@
 import Phaser from 'phaser';
 import Player from '../entities/Player.js';
 import Enemy from '../entities/Enemy.js';
+import { ExitZoneHelper } from '../utils/ExitZoneHelper.js';
+import { TimeOfDayHelper } from '../utils/TimeOfDayHelper.js';
+import { CombatHelper } from '../utils/CombatHelper.js';
 
 export default class ForestScene extends Phaser.Scene {
   player;
@@ -81,26 +84,8 @@ export default class ForestScene extends Phaser.Scene {
   }
 
   setupCombat() {
-    this.events.on('player-attack', (x, y, direction) => {
-      let hitX = x;
-      let hitY = y;
-      const range = 20;
-
-      if (direction === 'left') hitX -= range;
-      else if (direction === 'right') hitX += range;
-      else if (direction === 'up') hitY -= range;
-      else if (direction === 'down') hitY += range;
-
-      const swordHitbox = this.physics.add.sprite(hitX, hitY, null);
-      swordHitbox.setSize(24, 24);
-      swordHitbox.setVisible(false);
-
-      this.physics.overlap(swordHitbox, this.enemies, (sword, enemy) => {
-        enemy.disableBody(true, true);
-        this.events.emit('enemy-killed');
-      });
-
-      this.time.delayedCall(50, () => swordHitbox.destroy());
+    CombatHelper.setupCombatSystem(this, this.enemies, () => {
+      this.events.emit('enemy-killed');
     });
   }
 
@@ -109,26 +94,14 @@ export default class ForestScene extends Phaser.Scene {
       isEvening: this.isEvening,
       animated: false,
     });
-
-    const uiScene = this.scene.get('UIScene');
-    this.events.on('player-hit', () => {
-      uiScene.events.emit('player-hit-ui');
-    });
   }
 
   applyTimeOfDay() {
-    if (this.isEvening) {
-      this.time.delayedCall(100, () => {
-        this.events.emit('set-time', 'dusk', false);
-      });
-    }
+    TimeOfDayHelper.applyTimeOfDay(this, this.isEvening, false);
   }
 
   setupExitZone() {
-    const exitZone = this.add.rectangle(0, 400, 20, 800, 0xff0000, 0);
-    this.physics.world.enable(exitZone);
-    exitZone.body.setAllowGravity(false);
-    exitZone.body.moves = false;
+    const exitZone = ExitZoneHelper.createLeftExit(this);
 
     this.physics.add.overlap(this.player, exitZone, () => {
       this.scene.stop('UIScene');

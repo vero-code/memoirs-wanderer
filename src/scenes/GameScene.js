@@ -1,6 +1,9 @@
 // src/scenes/GameScene.js
 import Phaser from 'phaser';
 import Player from '../entities/Player.js';
+import { ExitZoneHelper } from '../utils/ExitZoneHelper.js';
+import { TimeOfDayHelper } from '../utils/TimeOfDayHelper.js';
+import { NPCHelper } from '../utils/NPCHelper.js';
 
 export default class GameScene extends Phaser.Scene {
   map;
@@ -80,21 +83,16 @@ export default class GameScene extends Phaser.Scene {
   }
 
   createNPCs() {
-    // Writer NPC
-    this.writer = this.physics.add.sprite(60, 290, 'player_sheet', 99);
-    this.writer.setDepth(2);
-    this.writer.setImmovable(true);
-
-    // Armorer NPC
-    this.armorer = this.physics.add.sprite(280, 280, 'player_sheet', 87);
-    this.armorer.setDepth(2);
-    this.armorer.setImmovable(true);
-    this.armorer.setFlipX(true);
-
-    // Merchant NPC
-    this.merchant = this.physics.add.sprite(450, 300, 'player_sheet', 86);
-    this.merchant.setDepth(2);
-    this.merchant.setImmovable(true);
+    this.writer = NPCHelper.createNPC(this, 60, 290, 'player_sheet', 99);
+    this.armorer = NPCHelper.createNPC(
+      this,
+      280,
+      280,
+      'player_sheet',
+      87,
+      true,
+    );
+    this.merchant = NPCHelper.createNPC(this, 450, 300, 'player_sheet', 86);
   }
 
   setupCamera() {
@@ -132,28 +130,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   setupExitZone() {
-    const exitZoneWidth = 20;
-    const exitZoneHeight = 30;
-
-    const mapRight = this.map.widthInPixels - 10;
-    const mapMiddle = this.map.heightInPixels / 2;
-
-    this.exitZone = this.add.zone(
-      mapRight,
-      mapMiddle,
-      exitZoneWidth,
-      exitZoneHeight,
-    );
-    this.physics.world.enable(this.exitZone);
-    this.exitZone.body.setAllowGravity(false);
-    this.exitZone.body.moves = false;
+    this.exitZone = ExitZoneHelper.createRightExit(this, this.map);
 
     // Exit zone overlap
     this.physics.add.overlap(this.player, this.exitZone, () => {
-      console.log('🌲 Leaving the city...');
       this.scene.stop('UIScene');
       this.scene.start('ForestScene');
     });
+
     // DEBUG: Uncomment to visualize exit zone
     // const debugRect = this.add.rectangle(
     //   mapRight,
@@ -174,9 +158,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   setEveningFirstTime() {
-    this.isEvening = true;
-    this.registry.set('isEvening', true);
-    this.events.emit('set-time', 'dusk', true);
+    this.isEvening = TimeOfDayHelper.setEveningFirstTime(this);
   }
 
   update(time, delta) {
@@ -188,30 +170,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   checkNPCInteractions() {
-    const distWriter = Phaser.Math.Distance.Between(
-      this.player.x,
-      this.player.y,
-      this.writer.x,
-      this.writer.y,
-    );
-    const distArmorer = Phaser.Math.Distance.Between(
-      this.player.x,
-      this.player.y,
-      this.armorer.x,
-      this.armorer.y,
-    );
-    const distMerchant = Phaser.Math.Distance.Between(
-      this.player.x,
-      this.player.y,
-      this.merchant.x,
-      this.merchant.y,
-    );
-
-    if (distWriter < 30) {
+    if (NPCHelper.isNearby(this.player, this.writer)) {
       this.handleWriterInteraction();
-    } else if (distArmorer < 30) {
+    } else if (NPCHelper.isNearby(this.player, this.armorer)) {
       this.handleArmorerInteraction();
-    } else if (distMerchant < 30) {
+    } else if (NPCHelper.isNearby(this.player, this.merchant)) {
       this.handleMerchantInteraction();
     } else {
       this.handleNoInteraction();
