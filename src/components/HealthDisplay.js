@@ -3,16 +3,16 @@ export class HealthDisplay {
   constructor(scene, maxHealth = 3) {
     this.scene = scene;
     this.maxHealth = maxHealth;
-    this.currentHealth = maxHealth;
     this.hearts = [];
-    
+    const storedHealth = this.scene.registry.get('playerHealth');
+    this.currentHealth = storedHealth !== undefined ? storedHealth : maxHealth;
     this.createHearts();
   }
 
   createHearts() {
     this.hearts.forEach((h) => h.destroy());
     this.hearts = [];
-    for (let i = 0; i < this.maxHealth; i++) {
+    for (let i = 0; i < this.currentHealth; i++) {
       const heart = this.scene.add.text(20 + i * 30, 20, '❤️', {
         fontSize: '24px',
       });
@@ -24,9 +24,9 @@ export class HealthDisplay {
   takeDamage() {
     if (this.currentHealth > 0) {
       this.currentHealth--;
-      
-      const heartToRemove = this.hearts[this.currentHealth];
+      this.scene.registry.set('playerHealth', this.currentHealth);
       this.flashRemainingHearts();
+      const heartToRemove = this.hearts.pop();
       if (heartToRemove) {
         this.animateHeartDeath(heartToRemove);
       }
@@ -36,19 +36,17 @@ export class HealthDisplay {
   }
 
   flashRemainingHearts() {
-    for (let i = 0; i < this.currentHealth; i++) {
-      const heart = this.hearts[i];
+    this.hearts.forEach((heart) => {
       if (heart && heart.active) {
         this.scene.tweens.add({
           targets: heart,
-          alpha: 0.5,
           scale: 1.2,
           duration: 100,
           yoyo: true,
           repeat: 1,
         });
       }
-    }
+    });
   }
 
   animateHeartDeath(heart) {
@@ -66,8 +64,9 @@ export class HealthDisplay {
   }
 
   reset() {
-    this.createHearts();
     this.currentHealth = this.maxHealth;
+    this.scene.registry.set('playerHealth', this.currentHealth);
+    this.createHearts();
   }
 
   getCurrentHealth() {

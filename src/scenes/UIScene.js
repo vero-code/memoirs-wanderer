@@ -127,6 +127,13 @@ export default class UIScene extends Phaser.Scene {
         this.connectSceneEvents(scene);
       }
     });
+
+    this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.gameScenes.forEach((sceneKey) => {
+        const scene = this.scene.get(sceneKey);
+        if (scene) this.disconnectSceneEvents(scene);
+      });
+    });
   }
 
   disconnectSceneEvents(scene) {
@@ -263,6 +270,7 @@ export default class UIScene extends Phaser.Scene {
 
   restartGame() {
     this.clearGameState();
+    this.healthDisplay.reset();
     this.stopAllGameScenes();
     this.scene.start('GameScene');
   }
