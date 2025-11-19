@@ -30,6 +30,11 @@ export default class UIScene extends Phaser.Scene {
     this.initialAnimated = data?.animated !== undefined ? data.animated : false;
   }
 
+  getText(key) {
+    const localeData = this.registry.get('locale_data');
+    return localeData ? localeData[key] : key;
+  }
+
   create() {
     this.resetState();
     this.createUI();
@@ -43,7 +48,10 @@ export default class UIScene extends Phaser.Scene {
   }
 
   resetState() {
-    this.score = 0;
+    this.score = this.registry.get('score') || 0;
+    if (this.scoreText) {
+      this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
+    }
     this.gameOverText = null;
     this.finalScoreText = null;
     this.restartButton = null;
@@ -66,7 +74,7 @@ export default class UIScene extends Phaser.Scene {
 
     // Score text
     this.scoreText = this.add
-      .text(400, 20, '💀 Score: 0', {
+      .text(400, 20, `${this.getText('uiScore')}${this.score}`, {
         fontSize: '24px',
         fill: '#ffffff',
         stroke: '#000000',
@@ -269,6 +277,7 @@ export default class UIScene extends Phaser.Scene {
 
   handleEnemyKilled() {
     this.score += 100;
+    this.registry.set('score', this.score);
     this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
     this.animateScoreIncrease();
   }
@@ -363,6 +372,7 @@ export default class UIScene extends Phaser.Scene {
     this.registry.set('hasArmor', false);
     this.registry.set('hasPotato', false);
     this.registry.set('isEvening', false);
+    this.registry.set('score', 0);
   }
 
   stopAllGameScenes() {
