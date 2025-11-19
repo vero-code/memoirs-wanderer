@@ -102,17 +102,33 @@ export default class ForestScene extends Phaser.Scene {
 
   setupExitZone() {
     const exitZone = ExitZoneHelper.createLeftExit(this);
-
     this.physics.add.overlap(this.player, exitZone, () => {
+      this.cleanupScene();
       this.scene.stop('UIScene');
       this.scene.start('GameScene', { fromForest: true });
     });
   }
 
+  cleanupScene() {
+    this.events.off('player-attack');
+    if (this.enemies) {
+      this.enemies.clear(true, true);
+    }
+  }
+
+  shutdown() {
+    this.cleanupScene();
+  }
+
   update() {
+    if (!this.player || !this.player.active) return;
     this.player.update();
-    this.enemies.children.iterate((child) => {
-      if (child) child.update();
-    });
+    if (this.enemies) {
+      this.enemies.children.iterate((child) => {
+        if (child && child.active) {
+          child.update();
+        }
+      });
+    }
   }
 }

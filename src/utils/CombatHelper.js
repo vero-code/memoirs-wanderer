@@ -38,7 +38,17 @@ export class CombatHelper {
    * Sets up the combat system for the scene
    */
   static setupCombatSystem(scene, enemies, onKill) {
-    scene.events.on('player-attack', (x, y, direction) => {
+    scene.events.off('player-attack');
+    const attackHandler = (x, y, direction) => {
+      if (!scene.scene.isActive()) {
+        console.warn('Scene not active, ignoring attack');
+        return;
+      }
+
+      if (!enemies || !enemies.children || enemies.children.size === 0) {
+        console.warn('No enemies to attack');
+        return;
+      }
       const hitbox = CombatHelper.createAttackHitbox(scene, x, y, direction);
       const overlapCollider = scene.physics.add.overlap(
         hitbox,
@@ -60,6 +70,15 @@ export class CombatHelper {
           hitbox.destroy();
         }
       });
+    };
+
+    scene.events.on('player-attack', attackHandler);
+    scene.events.once('shutdown', () => {
+      scene.events.off('player-attack', attackHandler);
+    });
+
+    scene.events.once('destroy', () => {
+      scene.events.off('player-attack', attackHandler);
     });
   }
 }

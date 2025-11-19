@@ -32,6 +32,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
+    if (!this.scene || !this.scene.scene.isActive()) {
+      return;
+    }
     if (this.isAttacking) return;
     this.setVelocity(0);
     const speed = 100;
@@ -67,6 +70,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   attack() {
+    if (!this.scene || !this.scene.scene.isActive()) {
+      console.warn('Scene not active, cannot attack');
+      return;
+    }
     this.isAttacking = true;
     this.setVelocity(0);
 
