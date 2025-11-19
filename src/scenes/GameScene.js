@@ -38,21 +38,38 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.loadGameState();
+    this.createWorld();
+    this.createPlayer();
+    this.createNPCs();
+    this.setupCamera();
+    this.setupCollisions();
+    this.setupExitZone();
+    this.setupUI();
+  }
+
+  loadGameState() {
     this.hasDiary = this.registry.get('hasDiary') || false;
     this.hasArmor = this.registry.get('hasArmor') || false;
     this.hasPotato = this.registry.get('hasPotato') || false;
     this.isEvening = this.registry.get('isEvening') || false;
+  }
 
+  createWorld() {
     this.map = this.make.tilemap({ key: 'map_dungeon' });
     const tileset = this.map.addTilesetImage('tileset', 'tiles_dungeon');
 
     this.layers.ground = this.map.createLayer('Dungeon', tileset, 0, 0);
     this.layers.ground.setDepth(0);
+
     this.layers.objects = this.map.createLayer('Objects', tileset, 0, 0);
     this.layers.objects.setDepth(1);
+
     this.layers.carts = this.map.createLayer('Carts', tileset, 0, 0);
     this.layers.carts.setDepth(3);
+  }
 
+  createPlayer() {
     this.player = new Player(
       this,
       this.startPosition.x,
@@ -60,22 +77,61 @@ export default class GameScene extends Phaser.Scene {
       'player_sheet',
       112,
     );
+  }
 
-    // NPC
+  createNPCs() {
+    // Writer NPC
     this.writer = this.physics.add.sprite(60, 290, 'player_sheet', 99);
     this.writer.setDepth(2);
     this.writer.setImmovable(true);
 
+    // Armorer NPC
     this.armorer = this.physics.add.sprite(280, 280, 'player_sheet', 87);
     this.armorer.setDepth(2);
     this.armorer.setImmovable(true);
     this.armorer.setFlipX(true);
 
+    // Merchant NPC
     this.merchant = this.physics.add.sprite(450, 300, 'player_sheet', 86);
     this.merchant.setDepth(2);
     this.merchant.setImmovable(true);
+  }
 
-    // Exit zone
+  setupCamera() {
+    const camera = this.cameras.main;
+    camera.startFollow(this.player);
+    camera.setZoom(2);
+    camera.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+
+    this.physics.world.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels,
+    );
+  }
+
+  setupCollisions() {
+    // Map collisions
+    this.layers.ground.setCollisionByProperty({ collides: true });
+    this.layers.objects.setCollisionByProperty({ collides: true });
+    this.layers.carts.setCollisionByProperty({ collides: true });
+
+    // Player vs map
+    this.physics.add.collider(this.player, this.layers.ground);
+    this.physics.add.collider(this.player, this.layers.objects);
+    this.physics.add.collider(this.player, this.layers.carts);
+
+    // NPC vs map
+    this.physics.add.collider(this.writer, this.layers.objects);
+
+    // Player vs NPCs
+    this.physics.add.collider(this.player, this.writer);
+    this.physics.add.collider(this.player, this.armorer);
+    this.physics.add.collider(this.player, this.merchant);
+  }
+
+  setupExitZone() {
     const exitZoneWidth = 20;
     const exitZoneHeight = 30;
 
@@ -92,6 +148,13 @@ export default class GameScene extends Phaser.Scene {
     this.exitZone.body.setAllowGravity(false);
     this.exitZone.body.moves = false;
 
+    // Exit zone overlap
+    this.physics.add.overlap(this.player, this.exitZone, () => {
+      console.log('🌲 Leaving the city...');
+      this.scene.stop('UIScene');
+      this.scene.start('ForestScene');
+    });
+    // DEBUG: Uncomment to visualize exit zone
     // const debugRect = this.add.rectangle(
     //   mapRight,
     //   mapMiddle,
@@ -101,43 +164,9 @@ export default class GameScene extends Phaser.Scene {
     //   0.5,
     // );
     // debugRect.setDepth(10);
+  }
 
-    // Camera and World
-    const camera = this.cameras.main;
-    camera.startFollow(this.player);
-    camera.setZoom(2);
-    camera.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-    this.physics.world.setBounds(
-      0,
-      0,
-      this.map.widthInPixels,
-      this.map.heightInPixels,
-    );
-
-    // Map Collisions
-    this.layers.ground.setCollisionByProperty({ collides: true });
-    this.layers.objects.setCollisionByProperty({ collides: true });
-    this.layers.carts.setCollisionByProperty({ collides: true });
-
-    this.physics.add.collider(this.player, this.layers.ground);
-    this.physics.add.collider(this.player, this.layers.objects);
-    this.physics.add.collider(this.player, this.layers.carts);
-
-    this.physics.add.collider(this.writer, this.layers.objects);
-
-    // NPC collisions
-    this.physics.add.collider(this.player, this.writer);
-    this.physics.add.collider(this.player, this.armorer);
-    this.physics.add.collider(this.player, this.merchant);
-
-    // Exit zone overlap
-    this.physics.add.overlap(this.player, this.exitZone, () => {
-      this.scene.stop('UIScene');
-      this.scene.start('ForestScene');
-    });
-
-    this.scene.launch('UIScene');
-
+  setupUI() {
     this.scene.launch('UIScene', {
       isEvening: this.isEvening,
       animated: false,
@@ -152,11 +181,13 @@ export default class GameScene extends Phaser.Scene {
 
   update(time, delta) {
     this.player.update();
-
     // console.log(
     //   `Player position: x=${this.player.x.toFixed(0)}, y=${this.player.y.toFixed(0)}`,
     // );
+    this.checkNPCInteractions();
+  }
 
+  checkNPCInteractions() {
     const distWriter = Phaser.Math.Distance.Between(
       this.player.x,
       this.player.y,
@@ -177,57 +208,75 @@ export default class GameScene extends Phaser.Scene {
     );
 
     if (distWriter < 30) {
-      if (!this.hasDiary) {
-        this.hasDiary = true;
-        this.justGotDiary = true;
-        this.registry.set('hasDiary', true);
-        this.events.emit('get-diary');
-      }
-      let text = this.justGotDiary
-        ? 'Writer: "Hello! Take this diary..."'
-        : 'Writer: "Good luck! Don\'t forget to write."';
-      this.events.emit('show-dialog', text);
-      this.activeNPC = 'writer';
+      this.handleWriterInteraction();
     } else if (distArmorer < 30) {
-      if (!this.hasArmor) {
-        this.hasArmor = true;
-        this.justGotArmor = true;
-        this.registry.set('hasArmor', true);
-        this.events.emit('get-armor');
-      }
-      let text = this.justGotArmor
-        ? 'Armorer: "Dangerous out there. Take this armor!"'
-        : 'Armorer: "Stay safe, traveler."';
-      this.events.emit('show-dialog', text);
-      this.activeNPC = 'armorer';
+      this.handleArmorerInteraction();
     } else if (distMerchant < 30) {
-      if (!this.hasPotato) {
-        this.hasPotato = true;
-        this.justGotPotato = true;
-        this.registry.set('hasPotato', true);
-        this.events.emit('get-potato');
-
-        if (!this.isEvening) {
-          this.setEveningFirstTime();
-        }
-      }
-      let text = this.justGotPotato
-        ? 'Merchant: "Fresh potatoes! Best price!"'
-        : 'Merchant: "Come back if you get hungry."';
-      this.events.emit('show-dialog', text);
-      this.activeNPC = 'merchant';
+      this.handleMerchantInteraction();
     } else {
-      this.events.emit('hide-dialog');
-      if (this.justGotDiary) this.justGotDiary = false;
-      if (this.justGotArmor) this.justGotArmor = false;
-      if (this.justGotPotato) this.justGotPotato = false;
-      this.activeNPC = null;
+      this.handleNoInteraction();
     }
   }
 
-  setEvening() {
-    this.isEvening = true;
-    this.registry.set('isEvening', true);
-    this.events.emit('set-time', 'dusk', true);
+  handleWriterInteraction() {
+    if (!this.hasDiary) {
+      this.hasDiary = true;
+      this.justGotDiary = true;
+      this.registry.set('hasDiary', true);
+      this.events.emit('get-diary');
+    }
+
+    const text = this.justGotDiary
+      ? 'Writer: "Hello! Take this diary..."'
+      : 'Writer: "Good luck! Don\'t forget to write."';
+
+    this.events.emit('show-dialog', text);
+    this.activeNPC = 'writer';
+  }
+
+  handleArmorerInteraction() {
+    if (!this.hasArmor) {
+      this.hasArmor = true;
+      this.justGotArmor = true;
+      this.registry.set('hasArmor', true);
+      this.events.emit('get-armor');
+    }
+
+    const text = this.justGotArmor
+      ? 'Armorer: "Dangerous out there. Take this armor!"'
+      : 'Armorer: "Stay safe, traveler."';
+
+    this.events.emit('show-dialog', text);
+    this.activeNPC = 'armorer';
+  }
+
+  handleMerchantInteraction() {
+    if (!this.hasPotato) {
+      this.hasPotato = true;
+      this.justGotPotato = true;
+      this.registry.set('hasPotato', true);
+      this.events.emit('get-potato');
+
+      if (!this.isEvening) {
+        this.setEveningFirstTime();
+      }
+    }
+
+    const text = this.justGotPotato
+      ? 'Merchant: "Fresh potatoes! Best price!"'
+      : 'Merchant: "Come back if you get hungry."';
+
+    this.events.emit('show-dialog', text);
+    this.activeNPC = 'merchant';
+  }
+
+  handleNoInteraction() {
+    this.events.emit('hide-dialog');
+
+    if (this.justGotDiary) this.justGotDiary = false;
+    if (this.justGotArmor) this.justGotArmor = false;
+    if (this.justGotPotato) this.justGotPotato = false;
+
+    this.activeNPC = null;
   }
 }
