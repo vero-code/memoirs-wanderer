@@ -7,7 +7,6 @@ import {
 } from '../components/InventorySystem.js';
 import { BackpackButton } from '../components/BackpackButton.js';
 import { GameOverScreen } from '../components/GameOverScreen.js';
-import { LanguageButton } from '../components/LanguageButton.js';
 
 export default class UIScene extends Phaser.Scene {
   // UI Components
@@ -19,8 +18,12 @@ export default class UIScene extends Phaser.Scene {
   healthDisplay;
   inventorySystem;
   backpackButton;
-  languageButton;
   gameOverScreen;
+
+  // Settings UI
+  settingsContainer;
+  isSettingsOpen = false;
+  settingsLangText;
 
   // State
   score = 0;
@@ -41,6 +44,7 @@ export default class UIScene extends Phaser.Scene {
     this.resetState();
     this.createUI();
     this.createComponents();
+    this.createSettingsWindow();
     this.createDarknessOverlay();
     this.applyInitialTimeOfDay();
     this.connectGameSceneEvents();
@@ -102,13 +106,105 @@ export default class UIScene extends Phaser.Scene {
     // Backpack Button
     this.backpackButton = new BackpackButton(this, 755, 35, () => {
       this.inventorySystem.toggle();
+      if (this.isSettingsOpen) this.toggleSettings();
     });
 
-    // Language Button
-    this.languageButton = new LanguageButton(this, 750, 570, () => {
-      this.updateUITexts();
-      this.notifyLanguageChange();
+    const settingsButtonContainer = this.add.container(690, 35);
+    settingsButtonContainer.setDepth(95);
+
+    const bg = this.add.circle(0, 0, 25, 0x000000, 0.6);
+    bg.setStrokeStyle(2, 0x888888);
+    
+    bg.setInteractive({ useHandCursor: true });
+    bg.on('pointerdown', () => this.toggleSettings());
+    bg.on('pointerover', () => bg.setStrokeStyle(2, 0xffff00));
+    bg.on('pointerout', () => bg.setStrokeStyle(2, 0x888888));
+
+    const icon = this.add.text(0, 0, '⚙️', { fontSize: '30px' }).setOrigin(0.5);
+    
+    settingsButtonContainer.add([bg, icon]);
+  }
+
+  // --- SETTINGS WINDOW ---
+
+  createSettingsWindow() {
+    this.settingsContainer = this.add.container(400, 300);
+    this.settingsContainer.setDepth(201);
+    this.settingsContainer.setVisible(false);
+
+    const bg = this.add.rectangle(0, 0, 320, 350, 0x1a1a1a, 0.95);
+    bg.setStrokeStyle(2, 0xffffff);
+
+    const title = this.add
+      .text(0, -140, 'SETTINGS', {
+        fontSize: '24px',
+        fontStyle: 'bold',
+        fill: '#ffffff',
+      })
+      .setOrigin(0.5);
+
+    const currentLang = this.registry.get('current_lang') || 'en';
+    this.settingsLangText = this.add
+      .text(0, -90, `Language: ${currentLang.toUpperCase()}`, {
+        fontSize: '20px',
+        fill: '#ffff00',
+        backgroundColor: '#333333',
+        padding: { x: 10, y: 5 },
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => this.toggleLanguage());
+
+    // --- Hot keys ---
+    const controlsConfig = [
+      { keys: 'WASD / ⬆️⬇️⬅️➡️', action: 'Move' },
+      { keys: 'SPACE', action: 'Attack' },
+      { keys: 'I / Mouse 🖱️', action: 'Inventory' },
+      { keys: 'ESC', action: 'Close tab' },
+    ];
+
+    let yPos = -30;
+    const controlsTextGroup = [];
+
+    controlsConfig.forEach((ctrl) => {
+      const keyText = this.add.text(-140, yPos, ctrl.keys, {
+        fontSize: '16px',
+        fill: '#AAAAAA',
+      });
+      const actionText = this.add
+        .text(140, yPos, ctrl.action, { fontSize: '16px', fill: '#FFFFFF' })
+        .setOrigin(1, 0);
+      controlsTextGroup.push(keyText, actionText);
+      yPos += 40;
     });
+
+    this.settingsContainer.add([
+      bg,
+      title,
+      this.settingsLangText,
+      ...controlsTextGroup,
+    ]);
+  }
+
+  toggleSettings() {
+    this.isSettingsOpen = !this.isSettingsOpen;
+    this.settingsContainer.setVisible(this.isSettingsOpen);
+
+    if (this.isSettingsOpen && this.inventorySystem.getIsOpen()) {
+      this.inventorySystem.toggle();
+    }
+  }
+
+  toggleLanguage() {
+    const current = this.registry.get('current_lang');
+    const next = current === 'en' ? 'ru' : 'en';
+    this.registry.set('current_lang', next);
+
+    const newData = this.cache.json.get(`locale_${next}`);
+    if (newData) this.registry.set('locale_data', newData);
+
+    this.updateUITexts();
+    this.notifyLanguageChange();
   }
 
   createDarknessOverlay() {
@@ -126,7 +222,11 @@ export default class UIScene extends Phaser.Scene {
 
   setupKeyboardShortcuts() {
     this.input.keyboard.on('keydown-I', () => {
-      this.inventorySystem.toggle();
+      if (!this.isSettingsOpen) this.inventorySystem.toggle();
+    });
+    this.input.keyboard.on('keydown-ESC', () => {
+      if (this.isSettingsOpen) this.toggleSettings();
+      else if (this.inventorySystem.getIsOpen()) this.inventorySystem.toggle();
     });
   }
 
@@ -135,22 +235,18 @@ export default class UIScene extends Phaser.Scene {
   notifyLanguageChange() {
     this.gameScenes.forEach((key) => {
       const scene = this.scene.get(key);
-      if (scene) {
-        scene.events.emit('language-changed');
-      }
+      if (scene) scene.events.emit('language-changed');
     });
   }
 
   updateUITexts() {
     this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
-
-    if (this.gameOverScreen) {
-      this.gameOverScreen.updateTexts();
+    const lang = this.registry.get('current_lang') || 'en';
+    if (this.settingsLangText) {
+      this.settingsLangText.setText(`Language: ${lang.toUpperCase()}`);
     }
-
-    if (this.inventorySystem) {
-      this.inventorySystem.clearTooltip();
-    }
+    if (this.gameOverScreen) this.gameOverScreen.updateTexts();
+    if (this.inventorySystem) this.inventorySystem.clearTooltip();
   }
 
   // --- EVENTS ---
@@ -174,7 +270,6 @@ export default class UIScene extends Phaser.Scene {
     scene.events.off('set-time');
     scene.events.off('player-hit');
     scene.events.off('enemy-killed');
-
     INVENTORY_ITEMS.forEach((item) => scene.events.off(item.event));
   }
 
@@ -184,7 +279,6 @@ export default class UIScene extends Phaser.Scene {
     scene.events.on('set-time', this.handleSetTime, this);
     scene.events.on('player-hit', this.handlePlayerHit, this);
     scene.events.on('enemy-killed', this.handleEnemyKilled, this);
-
     this.connectInventoryEvents(scene);
   }
 
@@ -194,8 +288,7 @@ export default class UIScene extends Phaser.Scene {
         item.event,
         () => {
           this.inventorySystem.refresh();
-
-          if (!this.inventorySystem.getIsOpen()) {
+          if (!this.inventorySystem.getIsOpen() && !this.isSettingsOpen) {
             this.backpackButton.pulse();
           }
         },
