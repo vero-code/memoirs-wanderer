@@ -53,5 +53,11 @@ export default class PreloaderScene extends Phaser.Scene {
       frameHeight: 16,
       spacing: 1,
     });
+
+    this.load.spritesheet('tiny_ski', 'assets/tilesets/tiny_ski.png', {
+      frameWidth: 16,
+      frameHeight: 16,
+      spacing: 1,
+    });
   }
 }

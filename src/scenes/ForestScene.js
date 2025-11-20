@@ -11,6 +11,8 @@ export default class ForestScene extends Phaser.Scene {
   player;
   enemies;
   ambushBushes;
+  trees;
+  stones;
   isEvening = false;
 
   constructor() {
@@ -45,21 +47,37 @@ export default class ForestScene extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, 800, 800);
 
-    // Trees
+    // --- TREES ---
     this.trees = this.physics.add.staticGroup();
     for (let i = 0; i < 40; i++) {
       const x = Phaser.Math.Between(50, 750);
       const y = Phaser.Math.Between(50, 750);
-      const tree = this.trees.create(x, y, 'town_sheet', 5);
-      tree.body.setSize(10, 10);
-      tree.body.setOffset(3, 3);
-      tree.setDepth(1);
+      if (Phaser.Math.Distance.Between(x, y, 20, 100) > 50) {
+        const tree = this.trees.create(x, y, 'town_sheet', 5);
+        tree.body.setSize(10, 10);
+        tree.body.setOffset(3, 3);
+        tree.setDepth(y);
+      }
+    }
+
+    // --- STONES ---
+    this.stones = this.physics.add.staticGroup();
+    for (let i = 0; i < 15; i++) {
+      const x = Phaser.Math.Between(50, 750);
+      const y = Phaser.Math.Between(50, 750);
+      if (Phaser.Math.Distance.Between(x, y, 20, 100) > 50) {
+        const stone = this.stones.create(x, y, 'tiny_ski', 81);
+        stone.body.setSize(14, 10);
+        stone.body.setOffset(1, 3);
+        stone.setDepth(y);
+      }
     }
   }
 
   createPlayer() {
     this.player = new Player(this, 20, 100, 'player_sheet', 112);
     this.player.setCollideWorldBounds(true);
+    this.player.setDepth(this.player.y);
   }
 
   createEnemies() {
@@ -68,6 +86,7 @@ export default class ForestScene extends Phaser.Scene {
       const x = Phaser.Math.Between(100, 700);
       const y = Phaser.Math.Between(200, 700);
       const zombie = new Enemy(this, x, y, 'player_sheet', 122, this.player);
+      zombie.setDepth(zombie.y);
       this.enemies.add(zombie);
     }
   }
@@ -87,6 +106,7 @@ export default class ForestScene extends Phaser.Scene {
         this.player,
         this.enemies,
       );
+      bush.setDepth(bush.y);
       this.ambushBushes.add(bush);
     }
   }
@@ -99,6 +119,10 @@ export default class ForestScene extends Phaser.Scene {
   setupCollisions() {
     this.physics.add.collider(this.player, this.trees);
     this.physics.add.collider(this.enemies, this.trees);
+
+    this.physics.add.collider(this.player, this.stones);
+    this.physics.add.collider(this.enemies, this.stones);
+
     this.physics.add.collider(this.enemies, this.enemies);
     this.physics.add.collider(this.player, this.ambushBushes);
     this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
@@ -149,10 +173,12 @@ export default class ForestScene extends Phaser.Scene {
   update() {
     if (!this.player || !this.player.active) return;
     this.player.update();
+    this.player.setDepth(this.player.y);
     if (this.enemies) {
       this.enemies.children.iterate((child) => {
         if (child && child.active) {
           child.update();
+          child.setDepth(child.y);
         }
       });
     }
