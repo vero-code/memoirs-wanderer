@@ -6,6 +6,8 @@ import {
   INVENTORY_ITEMS,
 } from '../components/InventorySystem.js';
 import { BackpackButton } from '../components/BackpackButton.js';
+import { SettingsButton } from '../components/SettingsButton.js';
+import { SettingsMenu } from '../components/SettingsMenu.js';
 import { GameOverScreen } from '../components/GameOverScreen.js';
 
 export default class UIScene extends Phaser.Scene {
@@ -18,14 +20,9 @@ export default class UIScene extends Phaser.Scene {
   healthDisplay;
   inventorySystem;
   backpackButton;
+  settingsButton;
+  settingsMenu;
   gameOverScreen;
-
-  // Settings UI
-  settingsContainer;
-  isSettingsOpen = false;
-  settingsLangText;
-  settingsTitleText;
-  settingsControlTexts = [];
 
   // State
   score = 0;
@@ -46,7 +43,6 @@ export default class UIScene extends Phaser.Scene {
     this.resetState();
     this.createUI();
     this.createComponents();
-    this.createSettingsWindow();
     this.createDarknessOverlay();
     this.applyInitialTimeOfDay();
     this.connectGameSceneEvents();
@@ -108,141 +104,25 @@ export default class UIScene extends Phaser.Scene {
     // Backpack Button
     this.backpackButton = new BackpackButton(this, 755, 35, () => {
       this.inventorySystem.toggle();
-      if (this.isSettingsOpen) this.toggleSettings();
+      if (this.settingsMenu.getIsOpen()) {
+        this.settingsMenu.toggle();
+      }
     });
 
-    const settingsButtonContainer = this.add.container(690, 35);
-    settingsButtonContainer.setDepth(95);
-
-    const bg = this.add.circle(0, 0, 25, 0x000000, 0.6);
-    bg.setStrokeStyle(2, 0x888888);
-
-    bg.setInteractive({ useHandCursor: true });
-    bg.on('pointerdown', () => this.toggleSettings());
-    bg.on('pointerover', () => bg.setStrokeStyle(2, 0xffff00));
-    bg.on('pointerout', () => bg.setStrokeStyle(2, 0x888888));
-
-    const icon = this.add.text(0, 0, '⚙️', { fontSize: '30px' }).setOrigin(0.5);
-    
-    settingsButtonContainer.add([bg, icon]);
-  }
-
-  // --- SETTINGS WINDOW ---
-
-  createSettingsWindow() {
-    this.settingsContainer = this.add.container(400, 300);
-    this.settingsContainer.setDepth(201);
-    this.settingsContainer.setVisible(false);
-
-    const bg = this.add.rectangle(0, 0, 320, 350, 0x1a1a1a, 0.95);
-    bg.setStrokeStyle(2, 0xffffff);
-
-    this.settingsTitleText = this.add
-      .text(0, -140, this.getText('uiSettings'), {
-        fontSize: '24px',
-        fontStyle: 'bold',
-        fill: '#ffffff',
-      })
-      .setOrigin(0.5);
-
-    const currentLang = this.registry.get('current_lang') || 'en';
-    this.settingsLangText = this.add
-      .text(
-        0,
-        -90,
-        `${this.getText('uiLanguage')}: ${currentLang.toUpperCase()}`,
-        {
-          fontSize: '20px',
-          fill: '#ffff00',
-          backgroundColor: '#333333',
-          padding: { x: 10, y: 5 },
-        },
-      )
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.toggleLanguage());
-
-    const controlsConfig = [
-      { keys: 'WASD / ⬆️⬇️⬅️➡️', localeKey: 'uiMove' },
-      { keys: 'SPACE', localeKey: 'uiAttack' },
-      { keys: 'I / Mouse 🖱️', localeKey: 'uiInventory' },
-      { keys: 'Esc', localeKey: 'uiClose' },
-    ];
-
-    let yPos = -30;
-    this.settingsControlTexts = [];
-    const controlsGroup = [];
-
-    controlsConfig.forEach((ctrl) => {
-      const keyText = this.add.text(-140, yPos, ctrl.keys, {
-        fontSize: '16px',
-        fill: '#AAAAAA',
-      });
-
-      const actionText = this.add
-        .text(140, yPos, this.getText(ctrl.localeKey), {
-          fontSize: '16px',
-          fill: '#FFFFFF',
-        })
-        .setOrigin(1, 0);
-
-      actionText.setData('localeKey', ctrl.localeKey);
-
-      this.settingsControlTexts.push(actionText);
-      controlsGroup.push(keyText, actionText);
-      yPos += 40;
+   // Settings Button
+    this.settingsButton = new SettingsButton(this, 690, 35, () => {
+      this.settingsMenu.toggle();
+      if (this.inventorySystem.getIsOpen()) {
+        this.inventorySystem.toggle();
+      }
     });
 
-    this.settingsContainer.add([
-      bg,
-      this.settingsTitleText,
-      this.settingsLangText,
-      ...controlsGroup,
-    ]);
-  }
-
-  toggleSettings() {
-    this.isSettingsOpen = !this.isSettingsOpen;
-    this.settingsContainer.setVisible(this.isSettingsOpen);
-
-    if (this.isSettingsOpen && this.inventorySystem.getIsOpen()) {
-      this.inventorySystem.toggle();
-    }
-  }
-
-  toggleLanguage() {
-    const current = this.registry.get('current_lang');
-    const next = current === 'en' ? 'ru' : 'en';
-    this.registry.set('current_lang', next);
-
-    const newData = this.cache.json.get(`locale_${next}`);
-    if (newData) this.registry.set('locale_data', newData);
-
-    this.updateUITexts();
-    this.notifyLanguageChange();
-  }
-
-  updateUITexts() {
-    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
-    const lang = this.registry.get('current_lang') || 'en';
-    if (this.settingsTitleText) {
-      this.settingsTitleText.setText(this.getText('uiSettings'));
-    }
-    if (this.settingsLangText) {
-      this.settingsLangText.setText(
-        `${this.getText('uiLanguage')}: ${lang.toUpperCase()}`,
-      );
-    }
-    if (this.settingsControlTexts) {
-      this.settingsControlTexts.forEach((textObj) => {
-        const key = textObj.getData('localeKey');
-        if (key) {
-          textObj.setText(this.getText(key));
-        }
-      });
-    }
-    if (this.gameOverScreen) this.gameOverScreen.updateTexts();
-    if (this.inventorySystem) this.inventorySystem.clearTooltip();
+    // Settings Menu
+    this.settingsMenu = new SettingsMenu(this, () => {
+      this.updateUITexts();
+      this.notifyLanguageChange();
+    });
+    this.settingsMenu.create();
   }
 
   createDarknessOverlay() {
@@ -260,11 +140,17 @@ export default class UIScene extends Phaser.Scene {
 
   setupKeyboardShortcuts() {
     this.input.keyboard.on('keydown-I', () => {
-      if (!this.isSettingsOpen) this.inventorySystem.toggle();
+      if (!this.settingsMenu.getIsOpen()) {
+        this.inventorySystem.toggle();
+      }
     });
+
     this.input.keyboard.on('keydown-ESC', () => {
-      if (this.isSettingsOpen) this.toggleSettings();
-      else if (this.inventorySystem.getIsOpen()) this.inventorySystem.toggle();
+      if (this.settingsMenu.getIsOpen()) {
+        this.settingsMenu.toggle();
+      } else if (this.inventorySystem.getIsOpen()) {
+        this.inventorySystem.toggle();
+      }
     });
   }
 
@@ -275,6 +161,18 @@ export default class UIScene extends Phaser.Scene {
       const scene = this.scene.get(key);
       if (scene) scene.events.emit('language-changed');
     });
+  }
+
+  updateUITexts() {
+    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
+
+    if (this.gameOverScreen) {
+      this.gameOverScreen.updateTexts();
+    }
+
+    if (this.inventorySystem) {
+      this.inventorySystem.clearTooltip();
+    }
   }
 
   // --- EVENTS ---
