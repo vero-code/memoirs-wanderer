@@ -86,22 +86,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     let offsetY = 5;
     let rotation = 0;
 
-    if (this.lastDirection === 'left') {
+    if (this.lastDirection === 'left' || this.lastDirection === 'up') {
       offsetX = -12;
-      this.toolSprite.setFlipX(true);
-      this.toolSprite.setDepth(this.depth + 1);
-    } else if (this.lastDirection === 'right') {
-      offsetX = 12;
       this.toolSprite.setFlipX(false);
       this.toolSprite.setDepth(this.depth + 1);
-    } else if (this.lastDirection === 'up') {
-      offsetY = -8;
-      offsetX = 6;
-      this.toolSprite.setDepth(this.depth - 1);
-    } else {
-      // down
-      offsetY = 8;
-      offsetX = -6;
+    } else if (this.lastDirection === 'right' || this.lastDirection === 'down') {
+      offsetX = 12;
+      this.toolSprite.setFlipX(true);
       this.toolSprite.setDepth(this.depth + 1);
     }
 
@@ -121,7 +112,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     if (isNearStone) {
-      const totalFrames = this.scene.textures.get('town_sheet').frameTotal;
       this.toolSprite.setFrame(129);
       this.toolSprite.setVisible(true);
     } else {
