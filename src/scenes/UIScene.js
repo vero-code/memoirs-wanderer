@@ -24,6 +24,8 @@ export default class UIScene extends Phaser.Scene {
   settingsContainer;
   isSettingsOpen = false;
   settingsLangText;
+  settingsTitleText;
+  settingsControlTexts = [];
 
   // State
   score = 0;
@@ -114,7 +116,7 @@ export default class UIScene extends Phaser.Scene {
 
     const bg = this.add.circle(0, 0, 25, 0x000000, 0.6);
     bg.setStrokeStyle(2, 0x888888);
-    
+
     bg.setInteractive({ useHandCursor: true });
     bg.on('pointerdown', () => this.toggleSettings());
     bg.on('pointerover', () => bg.setStrokeStyle(2, 0xffff00));
@@ -135,8 +137,8 @@ export default class UIScene extends Phaser.Scene {
     const bg = this.add.rectangle(0, 0, 320, 350, 0x1a1a1a, 0.95);
     bg.setStrokeStyle(2, 0xffffff);
 
-    const title = this.add
-      .text(0, -140, 'SETTINGS', {
+    this.settingsTitleText = this.add
+      .text(0, -140, this.getText('uiSettings'), {
         fontSize: '24px',
         fontStyle: 'bold',
         fill: '#ffffff',
@@ -145,44 +147,57 @@ export default class UIScene extends Phaser.Scene {
 
     const currentLang = this.registry.get('current_lang') || 'en';
     this.settingsLangText = this.add
-      .text(0, -90, `Language: ${currentLang.toUpperCase()}`, {
-        fontSize: '20px',
-        fill: '#ffff00',
-        backgroundColor: '#333333',
-        padding: { x: 10, y: 5 },
-      })
+      .text(
+        0,
+        -90,
+        `${this.getText('uiLanguage')}: ${currentLang.toUpperCase()}`,
+        {
+          fontSize: '20px',
+          fill: '#ffff00',
+          backgroundColor: '#333333',
+          padding: { x: 10, y: 5 },
+        },
+      )
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.toggleLanguage());
 
-    // --- Hot keys ---
     const controlsConfig = [
-      { keys: 'WASD / ⬆️⬇️⬅️➡️', action: 'Move' },
-      { keys: 'SPACE', action: 'Attack' },
-      { keys: 'I / Mouse 🖱️', action: 'Inventory' },
-      { keys: 'ESC', action: 'Close tab' },
+      { keys: 'WASD / ⬆️⬇️⬅️➡️', localeKey: 'uiMove' },
+      { keys: 'SPACE', localeKey: 'uiAttack' },
+      { keys: 'I / Mouse 🖱️', localeKey: 'uiInventory' },
+      { keys: 'Esc', localeKey: 'uiClose' },
     ];
 
     let yPos = -30;
-    const controlsTextGroup = [];
+    this.settingsControlTexts = [];
+    const controlsGroup = [];
 
     controlsConfig.forEach((ctrl) => {
       const keyText = this.add.text(-140, yPos, ctrl.keys, {
         fontSize: '16px',
         fill: '#AAAAAA',
       });
+
       const actionText = this.add
-        .text(140, yPos, ctrl.action, { fontSize: '16px', fill: '#FFFFFF' })
+        .text(140, yPos, this.getText(ctrl.localeKey), {
+          fontSize: '16px',
+          fill: '#FFFFFF',
+        })
         .setOrigin(1, 0);
-      controlsTextGroup.push(keyText, actionText);
+
+      actionText.setData('localeKey', ctrl.localeKey);
+
+      this.settingsControlTexts.push(actionText);
+      controlsGroup.push(keyText, actionText);
       yPos += 40;
     });
 
     this.settingsContainer.add([
       bg,
-      title,
+      this.settingsTitleText,
       this.settingsLangText,
-      ...controlsTextGroup,
+      ...controlsGroup,
     ]);
   }
 
@@ -205,6 +220,29 @@ export default class UIScene extends Phaser.Scene {
 
     this.updateUITexts();
     this.notifyLanguageChange();
+  }
+
+  updateUITexts() {
+    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
+    const lang = this.registry.get('current_lang') || 'en';
+    if (this.settingsTitleText) {
+      this.settingsTitleText.setText(this.getText('uiSettings'));
+    }
+    if (this.settingsLangText) {
+      this.settingsLangText.setText(
+        `${this.getText('uiLanguage')}: ${lang.toUpperCase()}`,
+      );
+    }
+    if (this.settingsControlTexts) {
+      this.settingsControlTexts.forEach((textObj) => {
+        const key = textObj.getData('localeKey');
+        if (key) {
+          textObj.setText(this.getText(key));
+        }
+      });
+    }
+    if (this.gameOverScreen) this.gameOverScreen.updateTexts();
+    if (this.inventorySystem) this.inventorySystem.clearTooltip();
   }
 
   createDarknessOverlay() {
@@ -237,16 +275,6 @@ export default class UIScene extends Phaser.Scene {
       const scene = this.scene.get(key);
       if (scene) scene.events.emit('language-changed');
     });
-  }
-
-  updateUITexts() {
-    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
-    const lang = this.registry.get('current_lang') || 'en';
-    if (this.settingsLangText) {
-      this.settingsLangText.setText(`Language: ${lang.toUpperCase()}`);
-    }
-    if (this.gameOverScreen) this.gameOverScreen.updateTexts();
-    if (this.inventorySystem) this.inventorySystem.clearTooltip();
   }
 
   // --- EVENTS ---

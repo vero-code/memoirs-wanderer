@@ -12,5 +12,11 @@
   "uiPotato": "🥔 Potato",
   "uiYouDied": "YOU DIED",
   "uiRestart": "💀 RESTART (Press R)",
-  "uiFinalScore": "Final Score: "
+  "uiFinalScore": "Final Score: ",
+  "uiSettings": "SETTINGS",
+  "uiLanguage": "Language",
+  "uiMove": "Move",
+  "uiAttack": "Attack",
+  "uiInventory": "Inventory",
+  "uiClose": "Close tab"
 }
