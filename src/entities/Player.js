@@ -7,6 +7,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   isAttacking = false;
   lastDirection = 'down';
 
+  toolSprite;
+
   constructor(scene, x, y, texture, frame) {
     super(scene, x, y, texture, frame);
 
@@ -15,6 +17,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.setDepth(2);
     this.setCollideWorldBounds(true);
+
+    this.toolSprite = scene.add.sprite(x, y, 'town_sheet', 0);
+    this.toolSprite.setVisible(false);
+    this.toolSprite.setDepth(3);
 
     this.cursors = scene.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.UP,
@@ -35,6 +41,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (!this.scene || !this.scene.scene.isActive()) {
       return;
     }
+
+    this.updateToolBehavior();
+
     if (this.isAttacking) return;
     this.setVelocity(0);
     const speed = 100;
@@ -69,6 +78,57 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  // --- TOOL LOGIC ---
+  updateToolBehavior() {
+    if (!this.toolSprite) return;
+
+    let offsetX = 0;
+    let offsetY = 5;
+    let rotation = 0;
+
+    if (this.lastDirection === 'left') {
+      offsetX = -12;
+      this.toolSprite.setFlipX(true);
+      this.toolSprite.setDepth(this.depth + 1);
+    } else if (this.lastDirection === 'right') {
+      offsetX = 12;
+      this.toolSprite.setFlipX(false);
+      this.toolSprite.setDepth(this.depth + 1);
+    } else if (this.lastDirection === 'up') {
+      offsetY = -8;
+      offsetX = 6;
+      this.toolSprite.setDepth(this.depth - 1);
+    } else {
+      // down
+      offsetY = 8;
+      offsetX = -6;
+      this.toolSprite.setDepth(this.depth + 1);
+    }
+
+    this.toolSprite.setPosition(this.x + offsetX, this.y + offsetY);
+
+    const stones = this.scene.stones;
+    let isNearStone = false;
+
+    if (stones) {
+      const closest = this.scene.physics.closest(this, stones.getChildren());
+      if (
+        closest &&
+        Phaser.Math.Distance.Between(this.x, this.y, closest.x, closest.y) < 40
+      ) {
+        isNearStone = true;
+      }
+    }
+
+    if (isNearStone) {
+      const totalFrames = this.scene.textures.get('town_sheet').frameTotal;
+      this.toolSprite.setFrame(129);
+      this.toolSprite.setVisible(true);
+    } else {
+      this.toolSprite.setVisible(false);
+    }
+  }
+
   attack() {
     if (!this.scene || !this.scene.scene.isActive()) {
       console.warn('Scene not active, cannot attack');
@@ -92,10 +152,22 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       y: targetY,
       duration: 50,
       yoyo: true,
+      onUpdate: () => {
+        this.updateToolBehavior();
+      },
       onComplete: () => {
         this.isAttacking = false;
       },
     });
+
+    if (this.toolSprite.visible) {
+      this.scene.tweens.add({
+        targets: this.toolSprite,
+        angle: this.lastDirection === 'left' ? -45 : 45,
+        duration: 50,
+        yoyo: true,
+      });
+    }
 
     this.scene.events.emit('player-attack', this.x, this.y, this.lastDirection);
   }
@@ -109,5 +181,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.clearTint();
       this.setAlpha(1);
     });
+  }
+
+  destroy(fromScene) {
+    if (this.toolSprite) this.toolSprite.destroy();
+    super.destroy(fromScene);
   }
 }
