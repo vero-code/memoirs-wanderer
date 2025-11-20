@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import Player from '../entities/Player.js';
 import Enemy from '../entities/Enemy.js';
 import AmbushBush from '../entities/AmbushBush.js';
+import Stone from '../entities/Stone.js';
 import { ExitZoneHelper } from '../utils/ExitZoneHelper.js';
 import { TimeOfDayHelper } from '../utils/TimeOfDayHelper.js';
 import { CombatHelper } from '../utils/CombatHelper.js';
@@ -28,6 +29,7 @@ export default class ForestScene extends Phaser.Scene {
     this.setupCamera();
     this.setupCollisions();
     this.setupCombat();
+    this.setupStoneDestruction();
     this.setupUI();
     this.applyTimeOfDay();
     this.setupExitZone();
@@ -61,15 +63,13 @@ export default class ForestScene extends Phaser.Scene {
     }
 
     // --- STONES ---
-    this.stones = this.physics.add.staticGroup();
+    this.stones = this.add.group();
     for (let i = 0; i < 15; i++) {
       const x = Phaser.Math.Between(50, 750);
       const y = Phaser.Math.Between(50, 750);
       if (Phaser.Math.Distance.Between(x, y, 20, 100) > 50) {
-        const stone = this.stones.create(x, y, 'tiny_ski', 81);
-        stone.body.setSize(14, 10);
-        stone.body.setOffset(1, 3);
-        stone.setDepth(y);
+        const stone = new Stone(this, x, y, 'tiny_ski', 81);
+        this.stones.add(stone);
       }
     }
   }
@@ -120,7 +120,7 @@ export default class ForestScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.trees);
     this.physics.add.collider(this.enemies, this.trees);
 
-    this.physics.add.collider(this.player, this.stones);
+    this.physics.add.collider(this.player, this.stones, null, null, this);
     this.physics.add.collider(this.enemies, this.stones);
 
     this.physics.add.collider(this.enemies, this.enemies);
@@ -134,6 +134,62 @@ export default class ForestScene extends Phaser.Scene {
     CombatHelper.setupCombatSystem(this, this.enemies, () => {
       this.events.emit('enemy-killed');
     });
+  }
+
+  setupStoneDestruction() {
+    this.events.on('player-attack', (x, y, direction) => {
+      this.checkStoneHit(x, y, direction);
+    });
+  }
+
+  checkStoneHit(playerX, playerY, direction) {
+    const hitRange = 25;
+    
+    this.stones.children.iterate((stone) => {
+      if (!stone || !stone.active) return;
+
+      const distance = Phaser.Math.Distance.Between(
+        playerX,
+        playerY,
+        stone.x,
+        stone.y
+      );
+
+      if (distance < hitRange) {
+        const isCorrectDirection = this.checkHitDirection(
+          playerX,
+          playerY,
+          stone.x,
+          stone.y,
+          direction
+        );
+
+        if (isCorrectDirection) {
+          const destroyed = stone.hit();
+          if (destroyed) {
+            this.events.emit('stone-destroyed');
+          }
+        }
+      }
+    });
+  }
+
+  checkHitDirection(playerX, playerY, stoneX, stoneY, direction) {
+    const dx = stoneX - playerX;
+    const dy = stoneY - playerY;
+
+    switch (direction) {
+      case 'left':
+        return dx < 0;
+      case 'right':
+        return dx > 0;
+      case 'up':
+        return dy < 0;
+      case 'down':
+        return dy > 0;
+      default:
+        return false;
+    }
   }
 
   setupUI() {
@@ -158,11 +214,15 @@ export default class ForestScene extends Phaser.Scene {
 
   cleanupScene() {
     this.events.off('player-attack');
+    this.events.off('stone-destroyed');
     if (this.enemies) {
       this.enemies.clear(true, true);
     }
     if (this.ambushBushes) {
       this.ambushBushes.clear(true, true);
+    }
+    if (this.stones) {
+      this.stones.clear(true, true);
     }
   }
 
