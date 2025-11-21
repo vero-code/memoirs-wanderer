@@ -53,14 +53,15 @@ export class InventorySystem {
   }
 
   createBackground() {
-    const bg = this.scene.add.rectangle(0, 0, 300, 200, 0x222222, 0.9);
+    const bg = this.scene.add.rectangle(0, 0, 300, 250, 0x222222, 0.9);
     bg.setStrokeStyle(2, 0xffffff);
     this.container.add(bg);
   }
 
   createTitle() {
+    const title = this.getText('uiInventory').toUpperCase();
     this.titleText = this.scene.add
-      .text(0, -80, this.getText('uiInventory'), {
+      .text(0, -80, title, {
         fontSize: '22px',
         fontStyle: 'bold',
         fill: '#ffffff',
@@ -195,7 +196,8 @@ export class InventorySystem {
 
   updateTexts() {
     if (this.titleText) {
-      this.titleText.setText(this.getText('uiInventory'));
+      const title = this.getText('uiInventory').toUpperCase();
+      this.titleText.setText(title);
     }
     if (this.isOpen) {
       this.refresh();

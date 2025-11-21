@@ -1,12 +1,10 @@
 // src/components/SettingsMenu.js
 import Phaser from 'phaser';
-
-const CONTROLS_CONFIG = [
-  { keys: 'WASD / ⬆️⬇️⬅️➡️', localeKey: 'uiMove' },
-  { keys: 'SPACE', localeKey: 'uiAttack' },
-  { keys: 'I / Mouse 🖱️', localeKey: 'uiInventory' },
-  { keys: 'Esc', localeKey: 'uiClose' },
-];
+import {
+  SETTINGS_LAYOUT,
+  SETTINGS_STYLES,
+  CONTROLS_CONFIG,
+} from '../config/settingsConfig.js';
 
 export class SettingsMenu {
   constructor(scene, onLanguageToggle) {
@@ -22,8 +20,11 @@ export class SettingsMenu {
   }
 
   create() {
-    this.container = this.scene.add.container(400, 300);
-    this.container.setDepth(201);
+    this.container = this.scene.add.container(
+      SETTINGS_LAYOUT.position.x,
+      SETTINGS_LAYOUT.position.y,
+    );
+    this.container.setDepth(SETTINGS_LAYOUT.depth);
     this.container.setVisible(false);
 
     this.createBackground();
@@ -33,17 +34,22 @@ export class SettingsMenu {
   }
 
   createBackground() {
-    const bg = this.scene.add.rectangle(0, 0, 320, 350, 0x1a1a1a, 0.95);
-    bg.setStrokeStyle(2, 0xffffff);
+    const { width, height, color, alpha, strokeWidth, strokeColor } =
+      SETTINGS_LAYOUT.background;
+
+    const bg = this.scene.add.rectangle(0, 0, width, height, color, alpha);
+    bg.setStrokeStyle(strokeWidth, strokeColor);
     this.container.add(bg);
   }
 
   createTitle() {
+    const style = SETTINGS_STYLES.title;
+
     this.titleText = this.scene.add
-      .text(0, -140, this.getText('uiSettings'), {
-        fontSize: '24px',
-        fontStyle: 'bold',
-        fill: '#ffffff',
+      .text(0, style.offsetY, this.getText('uiSettings'), {
+        fontSize: style.fontSize,
+        fontStyle: style.fontStyle,
+        fill: style.fill,
       })
       .setOrigin(0.5);
     this.container.add(this.titleText);
@@ -51,17 +57,18 @@ export class SettingsMenu {
 
   createLanguageButton() {
     const currentLang = this.scene.registry.get('current_lang') || 'en';
+    const style = SETTINGS_STYLES.languageButton;
 
     this.langText = this.scene.add
       .text(
         0,
-        -90,
+        style.offsetY,
         `${this.getText('uiLanguage')}: ${currentLang.toUpperCase()}`,
         {
-          fontSize: '20px',
-          fill: '#ffff00',
-          backgroundColor: '#333333',
-          padding: { x: 10, y: 5 },
+          fontSize: style.fontSize,
+          fill: style.fill,
+          backgroundColor: style.backgroundColor,
+          padding: style.padding,
         },
       )
       .setOrigin(0.5)
@@ -69,30 +76,33 @@ export class SettingsMenu {
       .on('pointerdown', () => this.toggleLanguage());
 
     this.langText.on('pointerover', () => {
-      this.langText.setStyle({ fill: '#ffffff' });
+      this.langText.setStyle({ fill: style.fillHover });
     });
 
     this.langText.on('pointerout', () => {
-      this.langText.setStyle({ fill: '#ffff00' });
+      this.langText.setStyle({ fill: style.fill });
     });
 
     this.container.add(this.langText);
   }
 
   createControlsSection() {
-    let yPos = -30;
+    let yPos = SETTINGS_STYLES.controlStartY;
     this.controlTexts = [];
 
+    const keyStyle = SETTINGS_STYLES.controlKeys;
+    const actionStyle = SETTINGS_STYLES.controlActions;
+
     CONTROLS_CONFIG.forEach((ctrl) => {
-      const keyText = this.scene.add.text(-140, yPos, ctrl.keys, {
-        fontSize: '16px',
-        fill: '#AAAAAA',
+      const keyText = this.scene.add.text(keyStyle.offsetX, yPos, ctrl.keys, {
+        fontSize: keyStyle.fontSize,
+        fill: keyStyle.fill,
       });
 
       const actionText = this.scene.add
-        .text(140, yPos, this.getText(ctrl.localeKey), {
-          fontSize: '16px',
-          fill: '#FFFFFF',
+        .text(actionStyle.offsetX, yPos, this.getText(ctrl.localeKey), {
+          fontSize: actionStyle.fontSize,
+          fill: actionStyle.fill,
         })
         .setOrigin(1, 0);
 
@@ -101,7 +111,7 @@ export class SettingsMenu {
       this.controlTexts.push(actionText);
       this.container.add([keyText, actionText]);
 
-      yPos += 40;
+      yPos += SETTINGS_STYLES.controlSpacing;
     });
   }
 
