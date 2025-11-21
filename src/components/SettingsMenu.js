@@ -1,18 +1,16 @@
 // src/components/SettingsMenu.js
 import Phaser from 'phaser';
+import { BaseUIComponent } from './BaseUIComponent.js';
 import {
   SETTINGS_LAYOUT,
   SETTINGS_STYLES,
   CONTROLS_CONFIG,
 } from '../config/settingsConfig.js';
 
-export class SettingsMenu {
+export class SettingsMenu extends BaseUIComponent {
   constructor(scene, onLanguageToggle) {
-    this.scene = scene;
+    super(scene);
     this.onLanguageToggle = onLanguageToggle;
-
-    this.container = null;
-    this.isOpen = false;
 
     this.titleText = null;
     this.langText = null;
@@ -20,26 +18,18 @@ export class SettingsMenu {
   }
 
   create() {
-    this.container = this.scene.add.container(
+    this.createContainer(
       SETTINGS_LAYOUT.position.x,
       SETTINGS_LAYOUT.position.y,
+      SETTINGS_LAYOUT.depth,
     );
-    this.container.setDepth(SETTINGS_LAYOUT.depth);
-    this.container.setVisible(false);
 
-    this.createBackground();
+    const bg = this.createBackground(SETTINGS_LAYOUT.background);
+    this.container.add(bg);
+
     this.createTitle();
     this.createLanguageButton();
     this.createControlsSection();
-  }
-
-  createBackground() {
-    const { width, height, color, alpha, strokeWidth, strokeColor } =
-      SETTINGS_LAYOUT.background;
-
-    const bg = this.scene.add.rectangle(0, 0, width, height, color, alpha);
-    bg.setStrokeStyle(strokeWidth, strokeColor);
-    this.container.add(bg);
   }
 
   createTitle() {
@@ -115,11 +105,6 @@ export class SettingsMenu {
     });
   }
 
-  toggle() {
-    this.isOpen = !this.isOpen;
-    this.container.setVisible(this.isOpen);
-  }
-
   toggleLanguage() {
     const current = this.scene.registry.get('current_lang');
     const next = current === 'en' ? 'ru' : 'en';
@@ -159,14 +144,5 @@ export class SettingsMenu {
         }
       });
     }
-  }
-
-  getText(key) {
-    const localeData = this.scene.registry.get('locale_data');
-    return localeData ? localeData[key] : key;
-  }
-
-  getIsOpen() {
-    return this.isOpen;
   }
 }

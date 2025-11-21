@@ -1,5 +1,6 @@
 // src/components/InventorySystem.js
 import Phaser from 'phaser';
+import { BaseUIComponent } from './BaseUIComponent.js';
 import {
   INVENTORY_LAYOUT,
   INVENTORY_STYLES,
@@ -9,36 +10,26 @@ import {
 
 export { INVENTORY_ITEMS };
 
-export class InventorySystem {
+export class InventorySystem extends BaseUIComponent {
   constructor(scene) {
-    this.scene = scene;
-    this.container = null;
+    super(scene);
     this.slots = [];
     this.tooltipText = null;
-    this.isOpen = false;
   }
 
   create() {
-    this.container = this.scene.add.container(
+    this.createContainer(
       INVENTORY_LAYOUT.position.x,
       INVENTORY_LAYOUT.position.y,
+      INVENTORY_LAYOUT.depth,
     );
-    this.container.setDepth(INVENTORY_LAYOUT.depth);
-    this.container.setVisible(false);
 
-    this.createBackground();
+    const bg = this.createBackground(INVENTORY_LAYOUT.background);
+    this.container.add(bg);
+
     this.createTitle();
     this.createSlots();
     this.createTooltip();
-  }
-
-  createBackground() {
-    const { width, height, color, alpha, strokeWidth, strokeColor } =
-      INVENTORY_LAYOUT.background;
-
-    const bg = this.scene.add.rectangle(0, 0, width, height, color, alpha);
-    bg.setStrokeStyle(strokeWidth, strokeColor);
-    this.container.add(bg);
   }
 
   createTitle() {
@@ -103,8 +94,7 @@ export class InventorySystem {
   }
 
   toggle() {
-    this.isOpen = !this.isOpen;
-    this.container.setVisible(this.isOpen);
+    super.toggle();
 
     if (this.isOpen) {
       this.refresh();
@@ -180,15 +170,6 @@ export class InventorySystem {
       countText.setName('itemCount');
       this.container.add(countText);
     }
-  }
-
-  getText(key) {
-    const localeData = this.scene.registry.get('locale_data');
-    return localeData ? localeData[key] : key;
-  }
-
-  getIsOpen() {
-    return this.isOpen;
   }
 
   clearTooltip() {
