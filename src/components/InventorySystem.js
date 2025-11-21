@@ -1,36 +1,13 @@
 // src/components/InventorySystem.js
 import Phaser from 'phaser';
+import {
+  INVENTORY_LAYOUT,
+  INVENTORY_STYLES,
+  INVENTORY_SLOTS,
+  INVENTORY_ITEMS,
+} from '../config/inventoryConfig.js';
 
-export const INVENTORY_ITEMS = [
-  {
-    id: 'diary',
-    regKey: 'hasDiary',
-    label: 'uiDiary',
-    emoji: '📔',
-    event: 'get-diary',
-  },
-  {
-    id: 'armor',
-    regKey: 'hasArmor',
-    label: 'uiArmor',
-    emoji: '🛡️',
-    event: 'get-armor',
-  },
-  {
-    id: 'potato',
-    regKey: 'hasPotato',
-    label: 'uiPotato',
-    emoji: '🥔',
-    event: 'get-potato',
-  },
-  {
-    id: 'stone',
-    regKey: 'hasStone',
-    label: 'uiStone',
-    emoji: '🪨',
-    event: 'get-stone',
-  },
-];
+export { INVENTORY_ITEMS };
 
 export class InventorySystem {
   constructor(scene) {
@@ -42,8 +19,11 @@ export class InventorySystem {
   }
 
   create() {
-    this.container = this.scene.add.container(400, 300);
-    this.container.setDepth(200);
+    this.container = this.scene.add.container(
+      INVENTORY_LAYOUT.position.x,
+      INVENTORY_LAYOUT.position.y,
+    );
+    this.container.setDepth(INVENTORY_LAYOUT.depth);
     this.container.setVisible(false);
 
     this.createBackground();
@@ -53,55 +33,70 @@ export class InventorySystem {
   }
 
   createBackground() {
-    const bg = this.scene.add.rectangle(0, 0, 300, 250, 0x222222, 0.9);
-    bg.setStrokeStyle(2, 0xffffff);
+    const { width, height, color, alpha, strokeWidth, strokeColor } =
+      INVENTORY_LAYOUT.background;
+
+    const bg = this.scene.add.rectangle(0, 0, width, height, color, alpha);
+    bg.setStrokeStyle(strokeWidth, strokeColor);
     this.container.add(bg);
   }
 
   createTitle() {
     const title = this.getText('uiInventory').toUpperCase();
+    const style = INVENTORY_STYLES.title;
+
     this.titleText = this.scene.add
-      .text(0, -80, title, {
-        fontSize: '22px',
-        fontStyle: 'bold',
-        fill: '#ffffff',
+      .text(0, style.offsetY, title, {
+        fontSize: style.fontSize,
+        fontStyle: style.fontStyle,
+        fill: style.fill,
       })
       .setOrigin(0.5);
     this.container.add(this.titleText);
   }
 
   createSlots() {
-    const startX = -100;
-    const startY = -40;
-    const slotSize = 50;
-    const gap = 10;
+    const {
+      total,
+      columns,
+      size,
+      gap,
+      startX,
+      startY,
+      slotColor,
+      slotAlpha,
+      slotStrokeWidth,
+      slotStrokeColor,
+    } = INVENTORY_SLOTS;
 
-    for (let i = 0; i < 8; i++) {
-      const col = i % 4;
-      const row = Math.floor(i / 4);
-      const x = startX + col * (slotSize + gap);
-      const y = startY + row * (slotSize + gap);
+    for (let i = 0; i < total; i++) {
+      const col = i % columns;
+      const row = Math.floor(i / columns);
+      const x = startX + col * (size + gap);
+      const y = startY + row * (size + gap);
 
       const slot = this.scene.add.rectangle(
         x,
         y,
-        slotSize,
-        slotSize,
-        0x000000,
-        0.5,
+        size,
+        size,
+        slotColor,
+        slotAlpha,
       );
-      slot.setStrokeStyle(1, 0x666666);
+      slot.setStrokeStyle(slotStrokeWidth, slotStrokeColor);
       this.container.add(slot);
       this.slots.push({ x, y });
     }
   }
 
   createTooltip() {
+    const style = INVENTORY_STYLES.tooltip;
+
     this.tooltipText = this.scene.add
-      .text(0, 80, '', {
-        fontSize: '16px',
-        fill: '#ffff00',
-        fontStyle: 'italic',
+      .text(0, style.offsetY, '', {
+        fontSize: style.fontSize,
+        fill: style.fill,
+        fontStyle: style.fontStyle,
       })
       .setOrigin(0.5);
     this.container.add(this.tooltipText);
@@ -139,11 +134,12 @@ export class InventorySystem {
 
   createItemIcon(slot, item) {
     const count = this.scene.registry.get(item.regKey);
+    const iconStyle = INVENTORY_STYLES.itemIcon;
 
     const icon = this.scene.add
       .text(slot.x, slot.y, item.emoji, {
-        fontSize: '32px',
-        padding: { x: 0, y: 0 },
+        fontSize: iconStyle.fontSize,
+        padding: iconStyle.padding,
       })
       .setOrigin(0.5);
 
@@ -153,25 +149,32 @@ export class InventorySystem {
     icon.on('pointerover', () => {
       const localizedName = this.getText(item.label);
       this.tooltipText.setText(localizedName);
-      icon.setScale(1.2);
+      icon.setScale(iconStyle.hoverScale);
     });
 
     icon.on('pointerout', () => {
       this.tooltipText.setText('');
-      icon.setScale(1);
+      icon.setScale(iconStyle.normalScale);
     });
 
     this.container.add(icon);
 
     if (typeof count === 'number' && count > 1) {
+      const countStyle = INVENTORY_STYLES.itemCount;
+
       const countText = this.scene.add
-        .text(slot.x + 20, slot.y + 20, count.toString(), {
-          fontSize: '14px',
-          fontStyle: 'bold',
-          fill: '#ffffff',
-          stroke: '#000000',
-          strokeThickness: 3,
-        })
+        .text(
+          slot.x + countStyle.offsetX,
+          slot.y + countStyle.offsetY,
+          count.toString(),
+          {
+            fontSize: countStyle.fontSize,
+            fontStyle: countStyle.fontStyle,
+            fill: countStyle.fill,
+            stroke: countStyle.stroke,
+            strokeThickness: countStyle.strokeThickness,
+          },
+        )
         .setOrigin(1, 1);
 
       countText.setName('itemCount');
