@@ -172,6 +172,7 @@ export default class UIScene extends Phaser.Scene {
 
     if (this.inventorySystem) {
       this.inventorySystem.clearTooltip();
+      this.inventorySystem.updateTexts();
     }
   }
 

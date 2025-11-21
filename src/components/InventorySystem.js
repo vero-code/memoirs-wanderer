@@ -59,14 +59,14 @@ export class InventorySystem {
   }
 
   createTitle() {
-    const title = this.scene.add
-      .text(0, -80, 'INVENTORY', {
+    this.titleText = this.scene.add
+      .text(0, -80, this.getText('uiInventory'), {
         fontSize: '22px',
         fontStyle: 'bold',
         fill: '#ffffff',
       })
       .setOrigin(0.5);
-    this.container.add(title);
+    this.container.add(this.titleText);
   }
 
   createSlots() {
@@ -190,6 +190,15 @@ export class InventorySystem {
   clearTooltip() {
     if (this.tooltipText) {
       this.tooltipText.setText('');
+    }
+  }
+
+  updateTexts() {
+    if (this.titleText) {
+      this.titleText.setText(this.getText('uiInventory'));
+    }
+    if (this.isOpen) {
+      this.refresh();
     }
   }
 }
