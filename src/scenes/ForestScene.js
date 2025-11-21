@@ -144,7 +144,7 @@ export default class ForestScene extends Phaser.Scene {
 
   checkStoneHit(playerX, playerY, direction) {
     const hitRange = 25;
-    
+
     this.stones.children.iterate((stone) => {
       if (!stone || !stone.active) return;
 
@@ -152,7 +152,7 @@ export default class ForestScene extends Phaser.Scene {
         playerX,
         playerY,
         stone.x,
-        stone.y
+        stone.y,
       );
 
       if (distance < hitRange) {
@@ -161,17 +161,17 @@ export default class ForestScene extends Phaser.Scene {
           playerY,
           stone.x,
           stone.y,
-          direction
+          direction,
         );
 
         if (isCorrectDirection) {
           const destroyed = stone.hit();
           if (destroyed) {
             this.events.emit('stone-destroyed');
-            if (!this.registry.get('hasStone')) {
-                this.registry.set('hasStone', true);
-                this.events.emit('get-stone');
-            }
+
+            const currentCount = this.registry.get('hasStone') || 0;
+            this.registry.set('hasStone', currentCount + 1);
+            this.events.emit('get-stone');
           }
         }
       }

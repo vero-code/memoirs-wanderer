@@ -119,6 +119,7 @@ export class InventorySystem {
   refresh() {
     this.container.each((child) => {
       if (child.name === 'itemIcon') child.destroy();
+      if (child.name === 'itemCount') child.destroy();
     });
 
     let slotIndex = 0;
@@ -136,6 +137,8 @@ export class InventorySystem {
   }
 
   createItemIcon(slot, item) {
+    const count = this.scene.registry.get(item.regKey);
+
     const icon = this.scene.add
       .text(slot.x, slot.y, item.emoji, {
         fontSize: '32px',
@@ -158,6 +161,21 @@ export class InventorySystem {
     });
 
     this.container.add(icon);
+
+    if (typeof count === 'number' && count > 1) {
+      const countText = this.scene.add
+        .text(slot.x + 20, slot.y + 20, count.toString(), {
+          fontSize: '14px',
+          fontStyle: 'bold',
+          fill: '#ffffff',
+          stroke: '#000000',
+          strokeThickness: 3,
+        })
+        .setOrigin(1, 1);
+
+      countText.setName('itemCount');
+      this.container.add(countText);
+    }
   }
 
   getText(key) {
