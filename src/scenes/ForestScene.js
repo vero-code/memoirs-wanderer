@@ -168,6 +168,10 @@ export default class ForestScene extends Phaser.Scene {
           const destroyed = stone.hit();
           if (destroyed) {
             this.events.emit('stone-destroyed');
+            if (!this.registry.get('hasStone')) {
+                this.registry.set('hasStone', true);
+                this.events.emit('get-stone');
+            }
           }
         }
       }

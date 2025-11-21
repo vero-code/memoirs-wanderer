@@ -23,6 +23,13 @@ export const INVENTORY_ITEMS = [
     emoji: '🥔',
     event: 'get-potato',
   },
+  {
+    id: 'stone',
+    regKey: 'hasStone',
+    label: 'uiStone',
+    emoji: '🪨',
+    event: 'get-stone',
+  },
 ];
 
 export class InventorySystem {
@@ -102,7 +109,7 @@ export class InventorySystem {
   toggle() {
     this.isOpen = !this.isOpen;
     this.container.setVisible(this.isOpen);
-    
+
     if (this.isOpen) {
       this.refresh();
       this.tooltipText.setText('');
