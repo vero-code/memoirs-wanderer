@@ -9,6 +9,7 @@ import { BackpackButton } from '../components/BackpackButton.js';
 import { SettingsButton } from '../components/SettingsButton.js';
 import { SettingsMenu } from '../components/SettingsMenu.js';
 import { GameOverScreen } from '../components/GameOverScreen.js';
+import { SaveManager } from '../utils/SaveManager.js';
 
 export default class UIScene extends Phaser.Scene {
   // UI Components
@@ -153,6 +154,11 @@ export default class UIScene extends Phaser.Scene {
         this.inventorySystem.toggle();
       }
     });
+
+    this.input.keyboard.on('keydown-F9', () => {
+      SaveManager.clear();
+      location.reload();
+    });
   }
 
   // --- LANGUAGE ---
@@ -175,6 +181,8 @@ export default class UIScene extends Phaser.Scene {
       this.inventorySystem.clearTooltip();
       this.inventorySystem.updateTexts();
     }
+
+    SaveManager.save(this);
   }
 
   // --- EVENTS ---
@@ -219,6 +227,7 @@ export default class UIScene extends Phaser.Scene {
           if (!this.inventorySystem.getIsOpen() && !this.isSettingsOpen) {
             this.backpackButton.pulse();
           }
+          SaveManager.save(this);
         },
         this,
       );
@@ -261,6 +270,7 @@ export default class UIScene extends Phaser.Scene {
 
   handlePlayerHit() {
     const isDead = this.healthDisplay.takeDamage();
+    SaveManager.save(this);
     if (isDead) {
       this.triggerGameOver();
     }
@@ -271,6 +281,7 @@ export default class UIScene extends Phaser.Scene {
     this.registry.set('score', this.score);
     this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
     this.animateScoreIncrease();
+    SaveManager.save(this);
   }
 
   animateScoreIncrease() {
