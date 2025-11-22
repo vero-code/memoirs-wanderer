@@ -25,5 +25,7 @@
   "uiMove": "Движение",
   "uiAttack": "Атака",
   "uiInventory": "Инвентарь",
-  "uiClose": "Закрыть окно"
+  "uiClose": "Закрыть окно",
+  "uiStartOver": "Начать заново",
+  "uiStartOverConfirm": "Точно сбросить?"
 }

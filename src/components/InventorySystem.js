@@ -12,7 +12,7 @@ export { INVENTORY_ITEMS };
 
 export class InventorySystem extends BaseUIComponent {
   constructor(scene) {
-    super(scene);
+    super(scene, INVENTORY_LAYOUT, INVENTORY_STYLES);
     this.slots = [];
     this.tooltipText = null;
   }

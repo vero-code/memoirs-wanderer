@@ -25,5 +25,7 @@
   "uiMove": "Move",
   "uiAttack": "Attack",
   "uiInventory": "Inventory",
-  "uiClose": "Close tab"
+  "uiClose": "Close tab",
+  "uiStartOver": "Start Over",
+  "uiStartOverConfirm": "Are you sure?"
 }

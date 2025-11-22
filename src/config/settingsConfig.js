@@ -45,6 +45,13 @@ export const SETTINGS_STYLES = {
   },
   controlSpacing: 40,
   controlStartY: -30,
+  resetButton: {
+    fontSize: '20px',
+    fontStyle: 'bold',
+    fill: '#ff4444',
+    fillHover: '#ff0000',
+    offsetY: 150,
+  },
 };
 
 export const CONTROLS_CONFIG = [

@@ -5,10 +5,13 @@ import Phaser from 'phaser';
  * Base class for UI components with common functionality
  */
 export class BaseUIComponent {
-  constructor(scene) {
+  constructor(scene, layoutConfig, stylesConfig) {
     this.scene = scene;
+    this.layout = layoutConfig;
+    this.styles = stylesConfig;
     this.container = null;
     this.isOpen = false;
+    this.titleText = null;
   }
 
   /**

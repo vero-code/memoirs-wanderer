@@ -1,6 +1,7 @@
 // src/components/SettingsMenu.js
 import Phaser from 'phaser';
 import { BaseUIComponent } from './BaseUIComponent.js';
+import { SaveManager } from '../utils/SaveManager.js';
 import {
   SETTINGS_LAYOUT,
   SETTINGS_STYLES,
@@ -9,12 +10,12 @@ import {
 
 export class SettingsMenu extends BaseUIComponent {
   constructor(scene, onLanguageToggle) {
-    super(scene);
+    super(scene, SETTINGS_LAYOUT, SETTINGS_STYLES);
     this.onLanguageToggle = onLanguageToggle;
-
     this.titleText = null;
     this.langText = null;
     this.controlTexts = [];
+    this.resetButton = null;
   }
 
   create() {
@@ -30,6 +31,7 @@ export class SettingsMenu extends BaseUIComponent {
     this.createTitle();
     this.createLanguageButton();
     this.createControlsSection();
+    this.createResetButton();
   }
 
   createTitle() {
@@ -123,6 +125,45 @@ export class SettingsMenu extends BaseUIComponent {
     }
   }
 
+  createResetButton() {
+    const styles = this.styles || {}; 
+    console.log(styles);
+    const style = styles.resetButton || {};
+    const fontSize = style.fontSize || '20px';
+    const fill = style.fill || '#44e3ffff';
+    const hover = style.fillHover || '#00ccffff';
+    const y = style.offsetY || 200;
+
+    this.resetButton = this.scene.add
+      .text(0, y, this.getText('uiStartOver'), {
+        fontSize: fontSize,
+        fontStyle: 'bold',
+        fill: fill,
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    this.resetButton.on('pointerover', () => {
+      this.resetButton.setStyle({ fill: hover });
+    });
+
+    this.resetButton.on('pointerout', () => {
+      this.resetButton.setStyle({ fill: fill });
+    });
+
+    this.resetButton.on('pointerdown', () => {
+      const confirmed = window.confirm(
+        this.getText('uiStartOverConfirm') || 'Reset game?',
+      );
+      if (confirmed) {
+        SaveManager.clear();
+        window.location.reload();
+      }
+    });
+
+    this.container.add(this.resetButton);
+  }
+
   updateTexts() {
     const lang = this.scene.registry.get('current_lang') || 'en';
 
@@ -143,6 +184,10 @@ export class SettingsMenu extends BaseUIComponent {
           textObj.setText(this.getText(key));
         }
       });
+    }
+
+    if (this.resetButton) {
+      this.resetButton.setText(this.getText('uiStartOver'));
     }
   }
 }
