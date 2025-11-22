@@ -156,6 +156,23 @@ export default class GameScene extends Phaser.Scene {
 
     // Exit zone overlap
     this.physics.add.overlap(this.player, this.exitZone, () => {
+      let missingItemTextKey = null;
+
+      if (!this.hasDiary) {
+        missingItemTextKey = 'heroThoughts_cantLeave';
+      } else if (!this.hasPotato) {
+        missingItemTextKey = 'heroThoughts_needPotato';
+      }
+
+      if (missingItemTextKey) {
+        this.showThought(missingItemTextKey);
+
+        this.player.setPosition(this.player.x - 30, this.player.y);
+        this.player.setVelocity(0);
+
+        return;
+      }
+
       this.scene.stop('UIScene');
       this.scene.start('ForestScene');
     });
@@ -263,5 +280,38 @@ export default class GameScene extends Phaser.Scene {
     if (this.justGotPotato) this.justGotPotato = false;
 
     this.activeNPC = null;
+  }
+
+  showThought(textKey) {
+    const text = this.getText(textKey);
+
+    if (this.currentThought) this.currentThought.destroy();
+
+    this.currentThought = this.add
+      .text(this.player.x, this.player.y - 40, text, {
+        fontSize: '10px',
+        fontFamily: 'monospace',
+        fill: '#ffffff',
+        backgroundColor: '#000000aa',
+        padding: { x: 6, y: 4 },
+        align: 'center',
+        wordWrap: { width: 70 },
+      })
+      .setOrigin(0.5)
+      .setDepth(1000);
+
+    this.tweens.add({
+      targets: this.currentThought,
+      y: this.currentThought.y - 30,
+      alpha: 0,
+      duration: 2500,
+      ease: 'Power1',
+      onComplete: () => {
+        if (this.currentThought) {
+          this.currentThought.destroy();
+          this.currentThought = null;
+        }
+      },
+    });
   }
 }
