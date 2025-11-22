@@ -4,6 +4,7 @@ import Player from '../entities/Player.js';
 import { ExitZoneHelper } from '../utils/ExitZoneHelper.js';
 import { TimeOfDayHelper } from '../utils/TimeOfDayHelper.js';
 import { NPCHelper } from '../utils/NPCHelper.js';
+import { SaveManager } from '../utils/SaveManager.js';
 
 export default class GameScene extends Phaser.Scene {
   map;
@@ -34,9 +35,16 @@ export default class GameScene extends Phaser.Scene {
   init(data) {
     if (data.fromForest) {
       this.startPosition = { x: 480, y: 165 };
-      this.armorer.setFlipX(false);
+    } else if (data.isDay2WakeUp) {
+      this.startPosition = { x: 150, y: 150 };
     } else {
-      this.startPosition = { x: 110, y: 150 };
+      const hasEntered = this.registry.get('hasEnteredTown');
+
+      if (hasEntered) {
+        this.startPosition = { x: 185, y: 182 };
+      } else {
+        this.startPosition = { x: 24, y: 35 };
+      }
     }
   }
 
@@ -54,6 +62,9 @@ export default class GameScene extends Phaser.Scene {
     this.setupCollisions();
     this.setupExitZone();
     this.setupUI();
+
+    this.registry.set('hasEnteredTown', true);
+    SaveManager.save(this);
 
     this.events.on('language-changed', () => {
       if (this.activeNPC === 'writer') this.handleWriterInteraction();

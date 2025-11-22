@@ -13,7 +13,9 @@ const KEYS_TO_SAVE = [
   'hasPotato',
   'hasStone',
   // Plot
-  'dayCount' 
+  'dayCount',
+  'itemsLost',
+  'hasEnteredTown'
 ];
 
 export const SaveManager = {
