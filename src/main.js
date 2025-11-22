@@ -6,9 +6,10 @@ import PreloaderScene from './scenes/PreloaderScene.js';
 import GameScene from './scenes/GameScene.js';
 import ForestScene from './scenes/ForestScene.js';
 import UIScene from './scenes/UIScene.js';
+import IntroScene from './scenes/IntroScene';
 
 const game = new Phaser.Game(
   Object.assign(config, {
-    scene: [BootScene, PreloaderScene, GameScene, ForestScene, UIScene],
+    scene: [BootScene, PreloaderScene, IntroScene, GameScene, ForestScene, UIScene],
   })
 );

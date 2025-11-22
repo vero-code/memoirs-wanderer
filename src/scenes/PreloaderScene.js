@@ -36,7 +36,7 @@ export default class PreloaderScene extends Phaser.Scene {
       const localeData = this.cache.json.get(`locale_${currentLang}`);
       this.registry.set('locale_data', localeData);
 
-      this.scene.start('GameScene');
+      this.scene.start('IntroScene');
     });
 
     this.load.json('locale_en', 'locales/en.json');
