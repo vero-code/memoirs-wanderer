@@ -52,7 +52,6 @@ export class InventorySystem extends BaseUIComponent {
       columns,
       size,
       gap,
-      startX,
       startY,
       slotColor,
       slotAlpha,
@@ -60,10 +59,13 @@ export class InventorySystem extends BaseUIComponent {
       slotStrokeColor,
     } = INVENTORY_SLOTS;
 
+    const rowWidth = (columns * size) + ((columns - 1) * gap);
+    const calculatedStartX = -(rowWidth / 2) + (size / 2);
+
     for (let i = 0; i < total; i++) {
       const col = i % columns;
       const row = Math.floor(i / columns);
-      const x = startX + col * (size + gap);
+      const x = calculatedStartX + col * (size + gap);
       const y = startY + row * (size + gap);
 
       const slot = this.scene.add.rectangle(
