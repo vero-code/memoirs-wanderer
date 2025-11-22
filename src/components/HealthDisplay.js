@@ -63,6 +63,33 @@ export class HealthDisplay {
     });
   }
 
+  heal(amount = 1) {
+    if (this.currentHealth < this.maxHealth) {
+      this.currentHealth += amount;
+
+      if (this.currentHealth > this.maxHealth) {
+        this.currentHealth = this.maxHealth;
+      }
+
+      this.scene.registry.set('playerHealth', this.currentHealth);
+      this.createHearts();
+
+      const lastHeart = this.hearts[this.hearts.length - 1];
+      if (lastHeart) {
+        lastHeart.setScale(0);
+        this.scene.tweens.add({
+          targets: lastHeart,
+          scale: 1,
+          duration: 400,
+          ease: 'Back.out',
+        });
+      }
+
+      return true;
+    }
+    return false;
+  }
+
   reset() {
     this.currentHealth = this.maxHealth;
     this.scene.registry.set('playerHealth', this.currentHealth);

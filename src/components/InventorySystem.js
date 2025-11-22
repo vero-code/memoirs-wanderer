@@ -59,8 +59,8 @@ export class InventorySystem extends BaseUIComponent {
       slotStrokeColor,
     } = INVENTORY_SLOTS;
 
-    const rowWidth = (columns * size) + ((columns - 1) * gap);
-    const calculatedStartX = -(rowWidth / 2) + (size / 2);
+    const rowWidth = columns * size + (columns - 1) * gap;
+    const calculatedStartX = -(rowWidth / 2) + size / 2;
 
     for (let i = 0; i < total; i++) {
       const col = i % columns;
@@ -147,6 +147,16 @@ export class InventorySystem extends BaseUIComponent {
     icon.on('pointerout', () => {
       this.tooltipText.setText('');
       icon.setScale(iconStyle.normalScale);
+    });
+
+    icon.on('pointerdown', () => {
+      this.scene.events.emit('inventory-item-use', item);
+      this.scene.tweens.add({
+        targets: icon,
+        scale: 0.8,
+        duration: 50,
+        yoyo: true,
+      });
     });
 
     this.container.add(icon);

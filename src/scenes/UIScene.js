@@ -47,6 +47,7 @@ export default class UIScene extends Phaser.Scene {
     this.applyInitialTimeOfDay();
     this.connectGameSceneEvents();
     this.setupKeyboardShortcuts();
+    this.events.on('inventory-item-use', this.handleItemUse, this);
   }
 
   resetState() {
@@ -109,7 +110,7 @@ export default class UIScene extends Phaser.Scene {
       }
     });
 
-   // Settings Button
+    // Settings Button
     this.settingsButton = new SettingsButton(this, 690, 35, () => {
       this.settingsMenu.toggle();
       if (this.inventorySystem.getIsOpen()) {
@@ -279,6 +280,21 @@ export default class UIScene extends Phaser.Scene {
       duration: 100,
       yoyo: true,
     });
+  }
+
+  handleItemUse(item) {
+    if (item.id === 'potato') {
+      const healed = this.healthDisplay.heal(1);
+      if (healed) {
+        const currentCount = this.registry.get('hasPotato');
+        const newCount = currentCount - 1;
+        this.registry.set('hasPotato', newCount > 0 ? newCount : false);
+        this.inventorySystem.refresh();
+      } else {
+        this.handleShowDialog(this.getText('hpFull') || 'HP Full!');
+        this.time.delayedCall(1000, () => this.handleHideDialog());
+      }
+    }
   }
 
   // --- GAME OVER ---
