@@ -8,8 +8,6 @@
   "gameStart": "The Game Begins!",
   "writerHello": "Writer: \"Hello! Take this diary...\"",
   "writerGoodbye": "Writer: \"Good luck! Don't forget to write.\"",
-  "armorerHello": "Armorer: \"Dangerous out there. Take this armor!\"",
-  "armorerGoodbye": "Armorer: \"Stay safe, traveler.\"",
   "merchantHello": "Merchant: \"Fresh potatoes! Best price!\"",
   "merchantGoodbye": "Merchant: \"Come back if you get hungry.\"",
   "uiScore": "💀 Score: ",
@@ -29,5 +27,8 @@
   "uiStartOver": "Start Over",
   "uiStartOverConfirm": "Are you sure?",
   "heroThoughts_cantLeave": "(Thoughts): I can't leave without a diary. I need to record everything.",
-  "heroThoughts_needPotato": "(Thoughts): Can't go into the forest without supplies. The Merchant had some food."
+  "heroThoughts_needPotato": "(Thoughts): Can't go into the forest without supplies. The Merchant had some food.",
+  "armorerQuest": "Want some shield? I don’t have the materials to forge it. Bring me 14 stones from the Bizarre Forest.",
+  "armorerSuccess": "Whoa, that’s a lot of stones! Great work. Here, I’ve forged a Shield for you.",
+  "armorerGoodbye": "Take good care of that shield."
 }

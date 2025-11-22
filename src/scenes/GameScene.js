@@ -237,18 +237,40 @@ export default class GameScene extends Phaser.Scene {
   }
 
   handleArmorerInteraction() {
-    if (!this.hasArmor) {
-      this.hasArmor = true;
-      this.justGotArmor = true;
-      this.registry.set('hasArmor', true);
-      this.events.emit('get-armor');
+    if (this.justGotArmor) {
+      this.events.emit('show-dialog', this.getText('armorerSuccess'));
+      this.activeNPC = 'armorer';
+      return;
     }
 
-    const text = this.justGotArmor
-      ? this.getText('armorerHello')
-      : this.getText('armorerGoodbye');
+    if (this.hasArmor) {
+      this.events.emit('show-dialog', this.getText('armorerGoodbye'));
+      this.activeNPC = 'armorer';
+      return;
+    }
 
-    this.events.emit('show-dialog', text);
+    const currentStones = Number(this.registry.get('hasStone')) || 0;
+    const REQUIRED_STONES = 14;
+
+    if (currentStones >= REQUIRED_STONES) {
+      const stonesLeft = currentStones - REQUIRED_STONES;
+
+      this.hasArmor = true;
+      this.registry.set('hasArmor', true);
+      this.registry.set('hasStone', stonesLeft > 0 ? stonesLeft : false);
+
+      this.justGotArmor = true;
+
+      this.events.emit('get-armor');
+      this.events.emit('get-stone');
+
+      this.events.emit('show-dialog', this.getText('armorerSuccess'));
+
+      SaveManager.save(this);
+    } else {
+      this.events.emit('show-dialog', this.getText('armorerQuest'));
+    }
+
     this.activeNPC = 'armorer';
   }
 
