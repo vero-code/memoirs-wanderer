@@ -123,10 +123,11 @@ export class SettingsMenu extends BaseUIComponent {
     if (this.onLanguageToggle) {
       this.onLanguageToggle();
     }
+    SaveManager.save(this.scene);
   }
 
   createResetButton() {
-    const styles = this.styles || {}; 
+    const styles = this.styles || {};
     console.log(styles);
     const style = styles.resetButton || {};
     const fontSize = style.fontSize || '20px';

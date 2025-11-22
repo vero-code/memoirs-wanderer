@@ -1,5 +1,6 @@
 // src/scenes/PreloaderScene.js
 import Phaser from 'phaser';
+import { SaveManager } from '../utils/SaveManager.js';
 
 export default class PreloaderScene extends Phaser.Scene {
   constructor() {
@@ -22,7 +23,14 @@ export default class PreloaderScene extends Phaser.Scene {
       loadingBar.destroy();
       a.destroy();
 
-      const currentLang = this.registry.get('current_lang') || 'en';
+      SaveManager.load(this);
+
+      let currentLang = this.registry.get('current_lang');
+      if (!currentLang) {
+          currentLang = 'en';
+          this.registry.set('current_lang', 'en');
+      }
+
       const localeData = this.cache.json.get(`locale_${currentLang}`);
       this.registry.set('locale_data', localeData);
 
