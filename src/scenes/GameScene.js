@@ -161,17 +161,22 @@ export default class GameScene extends Phaser.Scene {
       if (!this.hasDiary) {
         missingItemTextKey = 'heroThoughts_cantLeave';
       } else if (!this.hasPotato) {
-        missingItemTextKey = 'heroThoughts_needPotato';
+        const hasVisited = this.registry.get('hasVisitedForest');
+
+        if (!hasVisited) {
+          missingItemTextKey = 'heroThoughts_needPotato';
+        }
       }
 
       if (missingItemTextKey) {
         this.showThought(missingItemTextKey);
-
         this.player.setPosition(this.player.x - 30, this.player.y);
         this.player.setVelocity(0);
-
         return;
       }
+
+      this.registry.set('hasVisitedForest', true);
+      SaveManager.save(this);
 
       this.scene.stop('UIScene');
       this.scene.start('ForestScene');
