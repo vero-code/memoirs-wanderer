@@ -275,22 +275,31 @@ export default class GameScene extends Phaser.Scene {
   }
 
   handleMerchantInteraction() {
-    if (!this.hasPotato) {
+    if (this.justGotPotato) {
+      this.events.emit('show-dialog', this.getText('merchantHello'));
+      this.activeNPC = 'merchant';
+      return;
+    }
+
+    const alreadyReceived = this.registry.get('receivedFreePotato');
+
+    if (!alreadyReceived) {
       this.hasPotato = true;
       this.justGotPotato = true;
       this.registry.set('hasPotato', true);
+      this.registry.set('receivedFreePotato', true);
       this.events.emit('get-potato');
 
       if (!this.isEvening) {
         this.setEveningFirstTime();
       }
+      this.events.emit('show-dialog', this.getText('merchantHello'));
+
+      SaveManager.save(this);
+    } else {
+      this.events.emit('show-dialog', this.getText('merchantGoodbye'));
     }
 
-    const text = this.justGotPotato
-      ? this.getText('merchantHello')
-      : this.getText('merchantGoodbye');
-
-    this.events.emit('show-dialog', text);
     this.activeNPC = 'merchant';
   }
 

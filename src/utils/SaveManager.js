@@ -15,7 +15,8 @@ const KEYS_TO_SAVE = [
   // Plot
   'dayCount',
   'itemsLost',
-  'hasEnteredTown'
+  'hasEnteredTown',
+  'receivedFreePotato'
 ];
 
 export const SaveManager = {
