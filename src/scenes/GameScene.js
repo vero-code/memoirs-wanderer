@@ -156,6 +156,15 @@ export default class GameScene extends Phaser.Scene {
 
     // Exit zone overlap
     this.physics.add.overlap(this.player, this.exitZone, () => {
+      const itemsLost = this.registry.get('itemsLost');
+
+      if (itemsLost) {
+        this.showThought('heroThoughts_mustFindBag');
+        this.scene.stop('UIScene');
+        this.scene.start('ForestScene');
+        return;
+      }
+      
       let missingItemTextKey = null;
 
       if (!this.hasDiary) {

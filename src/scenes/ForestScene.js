@@ -17,6 +17,7 @@ export default class ForestScene extends Phaser.Scene {
   stones;
   isEvening = false;
   isDay2 = false;
+  isFalling = false;
 
   constructor() {
     super('ForestScene');
@@ -315,10 +316,22 @@ export default class ForestScene extends Phaser.Scene {
   }
 
   handleFall() {
+    if (this.isFalling) return;
+    this.isFalling = true;
+
     this.player.setVelocity(0);
     this.input.keyboard.enabled = false;
-
     this.events.emit('show-dialog', this.getText('heroThoughts_fall'));
+
+    const currentDiary = this.registry.get('hasDiary');
+    const currentArmor = this.registry.get('hasArmor');
+    const currentPotato = this.registry.get('hasPotato');
+    const currentStone = this.registry.get('hasStone');
+
+    this.registry.set('bag_hasDiary', currentDiary || false);
+    this.registry.set('bag_hasArmor', currentArmor || false);
+    this.registry.set('bag_hasPotato', currentPotato || false);
+    this.registry.set('bag_hasStone', currentStone || 0);
 
     this.cameras.main.fadeOut(2000, 0, 0, 0);
 
@@ -333,13 +346,14 @@ export default class ForestScene extends Phaser.Scene {
         this.registry.set('hasDiary', false);
         this.registry.set('hasArmor', false);
         this.registry.set('hasPotato', false);
+        this.registry.set('hasStone', 0);
+
         this.registry.set('itemsLost', true);
 
         SaveManager.save(this);
 
         this.scene.stop('UIScene');
         this.input.keyboard.enabled = true;
-
         this.scene.start('GameScene', { isDay2WakeUp: true });
       },
     );
@@ -360,14 +374,23 @@ export default class ForestScene extends Phaser.Scene {
   collectBag(bag) {
     bag.destroy();
 
-    this.registry.set('hasDiary', true);
-    this.registry.set('hasArmor', true);
-    this.registry.set('hasPotato', true);
+    const savedDiary = this.registry.get('bag_hasDiary');
+    const savedArmor = this.registry.get('bag_hasArmor');
+    const savedPotato = this.registry.get('bag_hasPotato');
+    const savedStone = this.registry.get('bag_hasStone');
+
+    this.registry.set('hasDiary', savedDiary);
+    this.registry.set('hasArmor', savedArmor);
+    this.registry.set('hasPotato', savedPotato);
+    this.registry.set('hasStone', savedStone);
+
     this.registry.set('itemsLost', false);
 
     this.events.emit('get-diary');
     this.events.emit('get-armor');
     this.events.emit('get-potato');
+    this.events.emit('get-stone');
+
     this.events.emit('show-dialog', this.getText('heroThoughts_bag'));
 
     SaveManager.save(this);

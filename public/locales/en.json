@@ -33,10 +33,13 @@
   "uiClose": "Close tab",
   "uiStartOver": "Start Over",
   "uiStartOverConfirm": "Are you sure?",
+
   "heroThoughts_cantLeave": "(Thoughts): I can't leave without a diary. I need to record everything.",
   "heroThoughts_needPotato": "(Thoughts): Can't go into the forest without supplies. The Merchant had some food.",
   "heroThoughts_fall": "Oh, a rock!.. AAAAAAH!!!...",
   "heroThoughts_bag": "Phew, my belongings are intact! Even my journal survived.",
+  "heroThoughts_mustFindBag": "I need to find my things...",
+
   "uiDay": "Day",
   "uiCoins": "Coins: ",
   "location_town": "Silent Town",
