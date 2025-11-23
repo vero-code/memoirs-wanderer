@@ -291,28 +291,46 @@ export default class ForestScene extends Phaser.Scene {
   }
 
   createFallTrigger() {
-    const x = 280;
-    const y = 400;
-    const width = 20;
-    const height = 800;
+    const mapWidth = 800;
+    const mapHeight = 800;
+    const cliffX = 700;
+    const gapY = 400;
+    const gapSize = 30;
 
-    const zone = this.add.zone(x, y, width, height);
+    for (let y = 0; y < mapHeight; y += 32) {
+      if (Math.abs(y - gapY) < gapSize) {
+        continue;
+      }
+
+      const mountain = this.physics.add.image(cliffX, y, 'tiny_ski', 81);
+      mountain.setScale(2.5);
+      mountain.setTint(0x888888);
+      mountain.setImmovable(true);
+      mountain.body.checkCollision.none = false;
+      this.physics.add.collider(this.player, mountain);
+      mountain.setDepth(y);
+    }
+
+    const abyss = this.add.rectangle(
+      cliffX + 50,
+      gapY,
+      200,
+      gapSize * 2,
+      0x000000,
+    );
+    abyss.setDepth(0);
+
+    const stumbleStone = this.add.image(cliffX + 20, gapY + 10, 'tiny_ski', 81);
+    stumbleStone.setScale(0.8);
+    stumbleStone.setTint(0xaaaaaa);
+    stumbleStone.setDepth(0);
+
+    const zone = this.add.zone(cliffX + 40, gapY, 50, gapSize * 2);
     this.physics.add.existing(zone, true);
+
     this.physics.add.overlap(this.player, zone, () => {
       this.handleFall();
     });
-
-    const abyss = this.add.rectangle(x + 10, y, width + 50, height, 0x000000);
-    abyss.setDepth(0);
-
-    for (let i = 0; i < height; i += 25) {
-      const stoneX = x - 15 + Phaser.Math.Between(-3, 3);
-
-      const decoration = this.add.image(stoneX, i, 'town_sheet', 81);
-      decoration.setTint(0x666666);
-      decoration.setScale(0.8);
-      decoration.setDepth(0);
-    }
   }
 
   handleFall() {
