@@ -387,7 +387,30 @@ export default class UIScene extends Phaser.Scene {
   }
 
   restartGame() {
-    this.clearGameState();
+    SaveManager.clear();
+
+    this.registry.set('score', 0);
+    this.registry.set('playerHealth', 3);
+    this.registry.set('isEvening', false);
+    this.registry.set('dayCount', 1);
+    this.registry.set('playerCoins', 0);
+
+    this.registry.set('hasDiary', false);
+    this.registry.set('hasArmor', false);
+    this.registry.set('hasPotato', false);
+    this.registry.set('hasStone', 0);
+
+    this.registry.set('itemsLost', false);
+    this.registry.set('hasEnteredTown', false);
+    this.registry.set('receivedFreePotato', false);
+    this.registry.set('receivedDiary', false);
+    this.registry.set('hasVisitedForest', false);
+
+    this.registry.set('bag_hasDiary', false);
+    this.registry.set('bag_hasArmor', false);
+    this.registry.set('bag_hasPotato', false);
+    this.registry.set('bag_hasStone', 0);
+
     this.healthDisplay.reset();
     this.stopAllGameScenes();
     this.scene.start('GameScene');
