@@ -391,7 +391,7 @@ export default class ForestScene extends Phaser.Scene {
     this.events.emit('get-potato');
     this.events.emit('get-stone');
 
-    this.events.emit('show-dialog', this.getText('heroThoughts_bag'));
+    this.showThought('heroThoughts_bag');
 
     SaveManager.save(this);
   }
@@ -399,5 +399,38 @@ export default class ForestScene extends Phaser.Scene {
   getText(key) {
     const localeData = this.registry.get('locale_data');
     return localeData ? localeData[key] : key;
+  }
+
+  showThought(textKey) {
+    const text = this.getText(textKey);
+
+    if (this.currentThought) this.currentThought.destroy();
+
+    this.currentThought = this.add
+      .text(this.player.x, this.player.y - 40, text, {
+        fontSize: '14px',
+        fontFamily: 'monospace',
+        fill: '#ffffff',
+        backgroundColor: '#000000aa',
+        padding: { x: 6, y: 4 },
+        align: 'center',
+        wordWrap: { width: 200 },
+      })
+      .setOrigin(0.5)
+      .setDepth(1000);
+
+    this.tweens.add({
+      targets: this.currentThought,
+      y: this.currentThought.y - 30,
+      alpha: 0,
+      duration: 2500,
+      ease: 'Power1',
+      onComplete: () => {
+        if (this.currentThought) {
+          this.currentThought.destroy();
+          this.currentThought = null;
+        }
+      },
+    });
   }
 }
