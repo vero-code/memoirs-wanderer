@@ -35,7 +35,6 @@ export const SaveManager = {
     try {
       const serialized = JSON.stringify(data);
       localStorage.setItem(SAVE_KEY, serialized);
-      console.log('Game Saved!', data);
     } catch (e) {
       console.warn('Failed to save game:', e);
     }
@@ -51,7 +50,6 @@ export const SaveManager = {
           scene.registry.set(key, data[key]);
         });
         
-        console.log('Game Loaded!', data);
         return true;
       }
     } catch (e) {
@@ -62,6 +60,5 @@ export const SaveManager = {
 
   clear: () => {
     localStorage.removeItem(SAVE_KEY);
-    console.log('Save deleted.');
   }
 };

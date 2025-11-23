@@ -38,6 +38,7 @@ export default class UIScene extends Phaser.Scene {
   init(data) {
     this.initialIsEvening = data?.isEvening || false;
     this.initialAnimated = data?.animated !== undefined ? data.animated : false;
+    this.initialLocationKey = data?.locationKey || '';
   }
 
   create() {
@@ -49,12 +50,16 @@ export default class UIScene extends Phaser.Scene {
     this.connectGameSceneEvents();
     this.setupKeyboardShortcuts();
     this.events.on('inventory-item-use', this.handleItemUse, this);
+    if (this.initialLocationKey && this.locationText) {
+      this.setLocation(this.initialLocationKey);
+    }
   }
 
   resetState() {
     this.score = this.registry.get('score') || 0;
     this.coins = this.registry.get('playerCoins') || 0;
     this.gameOverScreen = null;
+    this.currentLocationKey = null;
   }
 
   getText(key) {
@@ -68,6 +73,20 @@ export default class UIScene extends Phaser.Scene {
     this.createDialogText();
     this.createScoreText();
     this.createCoinText();
+    this.createLocationText();
+  }
+
+  createLocationText() {
+    this.locationText = this.add
+      .text(20, 60, '', {
+        fontFamily: 'serif',
+        fontSize: '18px',
+        fontStyle: 'italic',
+        fill: '#aaaaaa',
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      .setDepth(100);
   }
 
   createDialogText() {
@@ -99,13 +118,13 @@ export default class UIScene extends Phaser.Scene {
 
   createCoinText() {
     this.coinText = this.add
-      .text(780, 20, `🪙 ${this.coins}`, {
+      .text(640, 35, `🪙 ${this.coins}`, {
         fontSize: '24px',
         fill: '#ffd700',
         stroke: '#000000',
         strokeThickness: 4,
       })
-      .setOrigin(1, 0);
+      .setOrigin(1, 0.5);
     this.coinText.setDepth(100);
   }
 
@@ -118,7 +137,7 @@ export default class UIScene extends Phaser.Scene {
     this.inventorySystem.create();
 
     // Backpack Button
-    this.backpackButton = new BackpackButton(this, 755, 35, () => {
+    this.backpackButton = new BackpackButton(this, 690, 35, () => {
       this.inventorySystem.toggle();
       if (this.settingsMenu.getIsOpen()) {
         this.settingsMenu.toggle();
@@ -126,7 +145,7 @@ export default class UIScene extends Phaser.Scene {
     });
 
     // Settings Button
-    this.settingsButton = new SettingsButton(this, 690, 35, () => {
+    this.settingsButton = new SettingsButton(this, 755, 35, () => {
       this.settingsMenu.toggle();
       if (this.inventorySystem.getIsOpen()) {
         this.inventorySystem.toggle();
@@ -190,6 +209,10 @@ export default class UIScene extends Phaser.Scene {
     this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
 
     if (this.coinText) this.coinText.setText(`🪙 ${this.coins}`);
+
+    if (this.locationText && this.currentLocationKey) {
+      this.locationText.setText(this.getText(this.currentLocationKey));
+    }
 
     if (this.gameOverScreen) this.gameOverScreen.updateTexts();
     if (this.inventorySystem) {
@@ -324,14 +347,34 @@ export default class UIScene extends Phaser.Scene {
   }
 
   animateCoinGain(amount) {
-     this.updateUITexts();
-     
-     this.tweens.add({
-        targets: this.coinText,
-        scale: 1.5,
-        duration: 100,
-        yoyo: true
-     });
+    this.updateUITexts();
+
+    this.tweens.add({
+      targets: this.coinText,
+      scale: 1.5,
+      duration: 100,
+      yoyo: true,
+    });
+  }
+
+  setLocation(key) {
+    this.currentLocationKey = key;
+
+    const text = this.getText(key);
+
+    if (this.locationText.text === text) return;
+
+    this.locationText.setText(text);
+    this.locationText.setAlpha(0);
+    this.locationText.y = 70;
+
+    this.tweens.add({
+      targets: this.locationText,
+      y: 60,
+      alpha: 1,
+      duration: 1000,
+      ease: 'Power2',
+    });
   }
 
   // --- GAME OVER ---

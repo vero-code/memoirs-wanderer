@@ -37,5 +37,7 @@
   "uiStartOverConfirm": "Are you sure?",
   "heroThoughts_cantLeave": "(Thoughts): I can't leave without a diary. I need to record everything.",
   "heroThoughts_needPotato": "(Thoughts): Can't go into the forest without supplies. The Merchant had some food.",
-  "uiCoins": "Coins: "
+  "uiCoins": "Coins: ",
+  "location_town": "Silent Town",
+  "location_forest": "Bizarre Forest"
 }

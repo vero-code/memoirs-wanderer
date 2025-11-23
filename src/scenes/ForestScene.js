@@ -134,7 +134,7 @@ export default class ForestScene extends Phaser.Scene {
     CombatHelper.setupCombatSystem(this, this.enemies, (enemyX, enemyY) => {
       this.events.emit('enemy-killed');
 
-      const dropAmount = Phaser.Math.Between(10, 25);
+      const dropAmount = Phaser.Math.Between(1, 10);
       const currentCoins = this.registry.get('playerCoins') || 0;
       this.registry.set('playerCoins', currentCoins + dropAmount);
 
@@ -211,6 +211,7 @@ export default class ForestScene extends Phaser.Scene {
     this.scene.launch('UIScene', {
       isEvening: this.isEvening,
       animated: false,
+      locationKey: 'location_forest'
     });
   }
 

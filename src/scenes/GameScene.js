@@ -198,6 +198,7 @@ export default class GameScene extends Phaser.Scene {
     this.scene.launch('UIScene', {
       isEvening: this.isEvening,
       animated: false,
+      locationKey: 'location_town'
     });
   }
 

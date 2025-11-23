@@ -128,7 +128,6 @@ export class SettingsMenu extends BaseUIComponent {
 
   createResetButton() {
     const styles = this.styles || {};
-    console.log(styles);
     const style = styles.resetButton || {};
     const fontSize = style.fontSize || '20px';
     const fill = style.fill || '#44e3ffff';
