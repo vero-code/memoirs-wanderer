@@ -19,14 +19,12 @@
   "merchantBought": "It's a pleasure doing business with you! Here's your potato.",
   "merchantNoMoney": "You don’t have enough coins! Come back when you're richer.",
 
-  "uiScore": "💀 Score: ",
   "uiDiary": "Diary",
   "uiArmor": "Armor",
   "uiPotato": "Potato (+2 to health)",
   "uiStone": "Stone",
   "uiYouDied": "YOU DIED",
   "uiRestart": "💀 RESTART (Press R)",
-  "uiFinalScore": "Final Score: ",
   "uiSettings": "SETTINGS",
   "uiLanguage": "Language",
   "uiMove": "Move",
@@ -37,6 +35,7 @@
   "uiStartOverConfirm": "Are you sure?",
   "heroThoughts_cantLeave": "(Thoughts): I can't leave without a diary. I need to record everything.",
   "heroThoughts_needPotato": "(Thoughts): Can't go into the forest without supplies. The Merchant had some food.",
+  "uiDay": "Day",
   "uiCoins": "Coins: ",
   "location_town": "Silent Town",
   "location_forest": "Bizarre Forest"

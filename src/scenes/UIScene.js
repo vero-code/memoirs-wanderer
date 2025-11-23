@@ -14,7 +14,7 @@ import { SaveManager } from '../utils/SaveManager.js';
 export default class UIScene extends Phaser.Scene {
   // UI Components
   dialogText;
-  scoreText;
+  dayText;
   darknessOverlay;
 
   // Component instances
@@ -26,7 +26,6 @@ export default class UIScene extends Phaser.Scene {
   gameOverScreen;
 
   // State
-  score = 0;
   gameScenes = ['GameScene', 'ForestScene'];
   initialIsEvening = false;
   initialAnimated = false;
@@ -56,7 +55,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   resetState() {
-    this.score = this.registry.get('score') || 0;
+    this.dayCount = this.registry.get('dayCount') || 1;
     this.coins = this.registry.get('playerCoins') || 0;
     this.gameOverScreen = null;
     this.currentLocationKey = null;
@@ -71,7 +70,7 @@ export default class UIScene extends Phaser.Scene {
 
   createUI() {
     this.createDialogText();
-    this.createScoreText();
+    this.createDayText();
     this.createCoinText();
     this.createLocationText();
   }
@@ -104,16 +103,19 @@ export default class UIScene extends Phaser.Scene {
     this.dialogText.setDepth(100);
   }
 
-  createScoreText() {
-    this.scoreText = this.add
-      .text(400, 20, `${this.getText('uiScore')}${this.score}`, {
-        fontSize: '24px',
-        fill: '#ffffff',
+  createDayText() {
+    const day = this.registry.get('dayCount') || 1;
+
+    this.dayText = this.add
+      .text(400, 20, `${this.getText('uiDay')} ${day}`, {
+        fontSize: '18px',
+        fill: '#f3f3f3ff',
         stroke: '#000000',
         strokeThickness: 4,
+        fontFamily: 'monospace',
       })
-      .setOrigin(0.5, 0);
-    this.scoreText.setDepth(100);
+      .setOrigin(0.5, 0)
+      .setDepth(100);
   }
 
   createCoinText() {
@@ -206,7 +208,8 @@ export default class UIScene extends Phaser.Scene {
   updateUITexts() {
     this.coins = this.registry.get('playerCoins') || 0;
 
-    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
+    const day = this.registry.get('dayCount') || 1;
+    this.dayText.setText(`${this.getText('uiDay')} ${day}`);
 
     if (this.coinText) this.coinText.setText(`🪙 ${this.coins}`);
 
@@ -315,20 +318,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   handleEnemyKilled() {
-    this.score += 100;
-    this.registry.set('score', this.score);
-    this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
-    this.animateScoreIncrease();
     SaveManager.save(this);
-  }
-
-  animateScoreIncrease() {
-    this.tweens.add({
-      targets: this.scoreText,
-      scale: 1.2,
-      duration: 100,
-      yoyo: true,
-    });
   }
 
   handleItemUse(item) {
@@ -380,7 +370,7 @@ export default class UIScene extends Phaser.Scene {
   // --- GAME OVER ---
 
   triggerGameOver() {
-    this.gameOverScreen = new GameOverScreen(this, this.score, () => {
+    this.gameOverScreen = new GameOverScreen(this, () => {
       this.restartGame();
     });
     this.gameOverScreen.create();
@@ -406,7 +396,6 @@ export default class UIScene extends Phaser.Scene {
   clearGameState() {
     INVENTORY_ITEMS.forEach((item) => this.registry.set(item.regKey, false));
     this.registry.set('isEvening', false);
-    this.registry.set('score', 0);
   }
 
   stopAllGameScenes() {

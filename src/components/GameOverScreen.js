@@ -1,18 +1,15 @@
 // src/components/GameOverScreen.js
 export class GameOverScreen {
-  constructor(scene, score, onRestart) {
+  constructor(scene, onRestart) {
     this.scene = scene;
-    this.score = score;
     this.onRestart = onRestart;
 
     this.gameOverText = null;
-    this.finalScoreText = null;
     this.restartButton = null;
   }
 
   create() {
     this.createGameOverText();
-    this.createFinalScoreText();
     this.createRestartButton();
     this.setupKeyboard();
   }
@@ -25,16 +22,6 @@ export class GameOverScreen {
         align: 'center',
         stroke: '#000000',
         strokeThickness: 6,
-      })
-      .setOrigin(0.5)
-      .setDepth(200);
-  }
-
-  createFinalScoreText() {
-    this.finalScoreText = this.scene.add
-      .text(400, 320, `${this.getText('uiFinalScore')}${this.score}`, {
-        fontSize: '32px',
-        fill: '#ffffff',
       })
       .setOrigin(0.5)
       .setDepth(200);
@@ -74,11 +61,6 @@ export class GameOverScreen {
   updateTexts() {
     if (this.gameOverText) {
       this.gameOverText.setText(this.getText('uiYouDied'));
-    }
-    if (this.finalScoreText) {
-      this.finalScoreText.setText(
-        `${this.getText('uiFinalScore')}${this.score}`,
-      );
     }
     if (this.restartButton) {
       this.restartButton.setText(this.getText('uiRestart'));

@@ -62,10 +62,8 @@ export default class TitleScene extends Phaser.Scene {
     const hasSave = SaveManager.load(this);
 
     if (hasSave) {
-      console.log('Save found, entering game...');
       this.scene.start('GameScene');
     } else {
-      console.log('New game, showing story...');
       this.initNewGame();
 
       // --- DEBUG MODE ---
@@ -75,7 +73,6 @@ export default class TitleScene extends Phaser.Scene {
   }
 
   initNewGame() {
-    this.registry.set('score', 0);
     this.registry.set('playerHealth', 3);
     this.registry.set('isEvening', false);
     this.registry.set('dayCount', 1);

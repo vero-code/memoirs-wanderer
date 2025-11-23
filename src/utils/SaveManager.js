@@ -3,7 +3,6 @@
 const SAVE_KEY = 'memoirs_wanderer_save_v1';
 
 const KEYS_TO_SAVE = [
-  'score',
   'playerHealth',
   'current_lang',
   'isEvening',
