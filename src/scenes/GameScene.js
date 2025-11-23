@@ -164,7 +164,7 @@ export default class GameScene extends Phaser.Scene {
         this.scene.start('ForestScene');
         return;
       }
-      
+
       let missingItemTextKey = null;
 
       if (!this.hasDiary) {
@@ -207,7 +207,7 @@ export default class GameScene extends Phaser.Scene {
     this.scene.launch('UIScene', {
       isEvening: this.isEvening,
       animated: false,
-      locationKey: 'location_town'
+      locationKey: 'location_town',
     });
   }
 
@@ -236,18 +236,29 @@ export default class GameScene extends Phaser.Scene {
   }
 
   handleWriterInteraction() {
-    if (!this.hasDiary) {
-      this.hasDiary = true;
-      this.justGotDiary = true;
-      this.registry.set('hasDiary', true);
-      this.events.emit('get-diary');
+    if (this.justGotDiary) {
+      this.events.emit('show-dialog', this.getText('writerHello'));
+      this.activeNPC = 'writer';
+      return;
     }
 
-    const text = this.justGotDiary
-      ? this.getText('writerHello')
-      : this.getText('writerGoodbye');
+    const alreadyReceived = this.registry.get('receivedDiary');
 
-    this.events.emit('show-dialog', text);
+    if (!alreadyReceived) {
+      this.hasDiary = true;
+      this.justGotDiary = true;
+
+      this.registry.set('hasDiary', true);
+      this.registry.set('receivedDiary', true);
+
+      this.events.emit('get-diary');
+      this.events.emit('show-dialog', this.getText('writerHello'));
+
+      SaveManager.save(this);
+    } else {
+      this.events.emit('show-dialog', this.getText('writerGoodbye'));
+    }
+
     this.activeNPC = 'writer';
   }
 
@@ -331,10 +342,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.events.emit('show-dialog', this.getText('merchantBought'));
       } else {
-        this.events.emit(
-          'show-dialog',
-          `${this.getText('merchantSell')}`,
-        );
+        this.events.emit('show-dialog', `${this.getText('merchantSell')}`);
 
         if (currentCoins < PRICE) {
           this.time.delayedCall(2000, () => {
