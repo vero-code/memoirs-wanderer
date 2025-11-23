@@ -25,6 +25,7 @@ export default class GameScene extends Phaser.Scene {
 
   activeNPC = null;
   isEvening = false;
+  isDay2WakeUp = false;
 
   startPosition = { x: 110, y: 150 };
 
@@ -33,6 +34,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
+    this.isDay2WakeUp = data.isDay2WakeUp || false;
+
     if (data.fromForest) {
       this.startPosition = { x: 480, y: 165 };
     } else if (data.isDay2WakeUp) {
@@ -71,6 +74,12 @@ export default class GameScene extends Phaser.Scene {
       else if (this.activeNPC === 'armorer') this.handleArmorerInteraction();
       else if (this.activeNPC === 'merchant') this.handleMerchantInteraction();
     });
+
+    if (this.isDay2WakeUp) {
+      this.time.delayedCall(1500, () => {
+        this.showThought('heroThoughts_mustFindBag');
+      });
+    }
   }
 
   loadGameState() {
