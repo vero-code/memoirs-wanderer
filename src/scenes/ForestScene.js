@@ -7,6 +7,7 @@ import Stone from '../entities/Stone.js';
 import { ExitZoneHelper } from '../utils/ExitZoneHelper.js';
 import { TimeOfDayHelper } from '../utils/TimeOfDayHelper.js';
 import { CombatHelper } from '../utils/CombatHelper.js';
+import { SaveManager } from '../utils/SaveManager.js';
 
 export default class ForestScene extends Phaser.Scene {
   player;
@@ -15,6 +16,7 @@ export default class ForestScene extends Phaser.Scene {
   trees;
   stones;
   isEvening = false;
+  isDay2 = false;
 
   constructor() {
     super('ForestScene');
@@ -33,10 +35,17 @@ export default class ForestScene extends Phaser.Scene {
     this.setupUI();
     this.applyTimeOfDay();
     this.setupExitZone();
+    if (!this.isDay2) {
+      this.createFallTrigger();
+    } else {
+      this.createLostBag();
+    }
   }
 
   loadGameState() {
     this.isEvening = this.registry.get('isEvening') || false;
+    const day = this.registry.get('dayCount') || 1;
+    this.isDay2 = day >= 2;
   }
 
   createWorld() {
@@ -211,7 +220,7 @@ export default class ForestScene extends Phaser.Scene {
     this.scene.launch('UIScene', {
       isEvening: this.isEvening,
       animated: false,
-      locationKey: 'location_forest'
+      locationKey: 'location_forest',
     });
   }
 
@@ -278,5 +287,94 @@ export default class ForestScene extends Phaser.Scene {
         }
       });
     }
+  }
+
+  createFallTrigger() {
+    const x = 280;
+    const y = 400;
+    const width = 20;
+    const height = 800;
+
+    const zone = this.add.zone(x, y, width, height);
+    this.physics.add.existing(zone, true);
+    this.physics.add.overlap(this.player, zone, () => {
+      this.handleFall();
+    });
+
+    const abyss = this.add.rectangle(x + 10, y, width + 50, height, 0x000000);
+    abyss.setDepth(0);
+
+    for (let i = 0; i < height; i += 25) {
+      const stoneX = x - 15 + Phaser.Math.Between(-3, 3);
+
+      const decoration = this.add.image(stoneX, i, 'town_sheet', 81);
+      decoration.setTint(0x666666);
+      decoration.setScale(0.8);
+      decoration.setDepth(0);
+    }
+  }
+
+  handleFall() {
+    this.player.setVelocity(0);
+    this.input.keyboard.enabled = false;
+
+    this.events.emit('show-dialog', this.getText('heroThoughts_fall'));
+
+    this.cameras.main.fadeOut(2000, 0, 0, 0);
+
+    this.cameras.main.once(
+      Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+      () => {
+        this.events.emit('hide-dialog');
+
+        this.registry.set('dayCount', 2);
+        this.registry.set('isEvening', false);
+
+        this.registry.set('hasDiary', false);
+        this.registry.set('hasArmor', false);
+        this.registry.set('hasPotato', false);
+        this.registry.set('itemsLost', true);
+
+        SaveManager.save(this);
+
+        this.scene.stop('UIScene');
+        this.input.keyboard.enabled = true;
+
+        this.scene.start('GameScene', { isDay2WakeUp: true });
+      },
+    );
+  }
+
+  createLostBag() {
+    const itemsLost = this.registry.get('itemsLost');
+
+    if (itemsLost) {
+      const bag = this.physics.add.sprite(750, 400, 'town_sheet', 29);
+
+      this.physics.add.overlap(this.player, bag, () => {
+        this.collectBag(bag);
+      });
+    }
+  }
+
+  collectBag(bag) {
+    bag.destroy();
+
+    this.registry.set('hasDiary', true);
+    this.registry.set('hasArmor', true);
+    this.registry.set('hasPotato', true);
+    this.registry.set('itemsLost', false);
+
+    this.events.emit('get-diary');
+    this.events.emit('get-armor');
+    this.events.emit('get-potato');
+    this.events.emit('show-dialog', this.getText('heroThoughts_bag'));
+
+    SaveManager.save(this);
+  }
+
+  getText(key) {
+    const localeData = this.registry.get('locale_data');
+    return localeData ? localeData[key] : key;
   }
 }
