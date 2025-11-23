@@ -131,8 +131,19 @@ export default class ForestScene extends Phaser.Scene {
   }
 
   setupCombat() {
-    CombatHelper.setupCombatSystem(this, this.enemies, () => {
+    CombatHelper.setupCombatSystem(this, this.enemies, (enemyX, enemyY) => {
       this.events.emit('enemy-killed');
+
+      const dropAmount = Phaser.Math.Between(10, 25);
+      const currentCoins = this.registry.get('playerCoins') || 0;
+      this.registry.set('playerCoins', currentCoins + dropAmount);
+
+      this.showFloatingText(enemyX, enemyY, `+${dropAmount} 🪙`);
+
+      const uiScene = this.scene.get('UIScene');
+      if (uiScene) {
+        uiScene.animateCoinGain(dropAmount);
+      }
     });
   }
 
@@ -205,6 +216,26 @@ export default class ForestScene extends Phaser.Scene {
 
   applyTimeOfDay() {
     TimeOfDayHelper.applyTimeOfDay(this, this.isEvening, false);
+  }
+
+  showFloatingText(x, y, message) {
+    const text = this.add
+      .text(x, y - 20, message, {
+        fontSize: '16px',
+        fontStyle: 'bold',
+        fill: '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
+
+    this.tweens.add({
+      targets: text,
+      y: y - 50,
+      alpha: 0,
+      duration: 1500,
+      onComplete: () => text.destroy(),
+    });
   }
 
   setupExitZone() {

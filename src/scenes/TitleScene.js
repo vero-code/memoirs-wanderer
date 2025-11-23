@@ -88,6 +88,7 @@ export default class TitleScene extends Phaser.Scene {
     this.registry.set('itemsLost', false);
     this.registry.set('hasEnteredTown', false);
     this.registry.set('receivedFreePotato', false);
+    this.registry.set('playerCoins', 0);
   }
 
   getText(key) {

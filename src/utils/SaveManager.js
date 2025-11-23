@@ -16,7 +16,8 @@ const KEYS_TO_SAVE = [
   'dayCount',
   'itemsLost',
   'hasEnteredTown',
-  'receivedFreePotato'
+  'receivedFreePotato',
+  'playerCoins'
 ];
 
 export const SaveManager = {

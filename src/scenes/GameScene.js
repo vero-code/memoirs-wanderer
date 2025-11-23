@@ -297,7 +297,36 @@ export default class GameScene extends Phaser.Scene {
 
       SaveManager.save(this);
     } else {
-      this.events.emit('show-dialog', this.getText('merchantGoodbye'));
+      const PRICE = 50;
+      const currentCoins = this.registry.get('playerCoins') || 0;
+
+      if (currentCoins >= PRICE) {
+        this.registry.set('playerCoins', currentCoins - PRICE);
+
+        let potatoCount = this.registry.get('hasPotato') || 0;
+
+        if (typeof potatoCount !== 'number') potatoCount = 0;
+
+        this.registry.set('hasPotato', potatoCount + 1);
+        this.hasPotato = true;
+
+        this.events.emit('get-potato');
+        const uiScene = this.scene.get('UIScene');
+        if (uiScene) uiScene.updateUITexts();
+
+        this.events.emit('show-dialog', this.getText('merchantBought'));
+      } else {
+        this.events.emit(
+          'show-dialog',
+          `${this.getText('merchantSell')}`,
+        );
+
+        if (currentCoins < PRICE) {
+          this.time.delayedCall(2000, () => {
+            this.events.emit('show-dialog', this.getText('merchantNoMoney'));
+          });
+        }
+      }
     }
 
     this.activeNPC = 'merchant';

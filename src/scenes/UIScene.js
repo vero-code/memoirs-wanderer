@@ -53,6 +53,7 @@ export default class UIScene extends Phaser.Scene {
 
   resetState() {
     this.score = this.registry.get('score') || 0;
+    this.coins = this.registry.get('playerCoins') || 0;
     this.gameOverScreen = null;
   }
 
@@ -66,6 +67,7 @@ export default class UIScene extends Phaser.Scene {
   createUI() {
     this.createDialogText();
     this.createScoreText();
+    this.createCoinText();
   }
 
   createDialogText() {
@@ -93,6 +95,18 @@ export default class UIScene extends Phaser.Scene {
       })
       .setOrigin(0.5, 0);
     this.scoreText.setDepth(100);
+  }
+
+  createCoinText() {
+    this.coinText = this.add
+      .text(780, 20, `🪙 ${this.coins}`, {
+        fontSize: '24px',
+        fill: '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(1, 0);
+    this.coinText.setDepth(100);
   }
 
   createComponents() {
@@ -171,12 +185,13 @@ export default class UIScene extends Phaser.Scene {
   }
 
   updateUITexts() {
+    this.coins = this.registry.get('playerCoins') || 0;
+
     this.scoreText.setText(`${this.getText('uiScore')}${this.score}`);
 
-    if (this.gameOverScreen) {
-      this.gameOverScreen.updateTexts();
-    }
+    if (this.coinText) this.coinText.setText(`🪙 ${this.coins}`);
 
+    if (this.gameOverScreen) this.gameOverScreen.updateTexts();
     if (this.inventorySystem) {
       this.inventorySystem.clearTooltip();
       this.inventorySystem.updateTexts();
@@ -306,6 +321,17 @@ export default class UIScene extends Phaser.Scene {
         this.time.delayedCall(1000, () => this.handleHideDialog());
       }
     }
+  }
+
+  animateCoinGain(amount) {
+     this.updateUITexts();
+     
+     this.tweens.add({
+        targets: this.coinText,
+        scale: 1.5,
+        duration: 100,
+        yoyo: true
+     });
   }
 
   // --- GAME OVER ---
