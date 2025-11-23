@@ -19,7 +19,7 @@
   "merchantBought": "It's a pleasure doing business with you! Here's your potato.",
   "merchantNoMoney": "You don’t have enough coins! Come back when you're richer.",
 
-  "uiDiary": "Diary",
+  "uiDiary": "Diary (click to read)",
   "uiArmor": "Armor",
   "uiPotato": "Potato (+2 to health)",
   "uiStone": "Stone",
@@ -43,5 +43,13 @@
   "uiDay": "Day",
   "uiCoins": "Coins: ",
   "location_town": "Silent Town",
-  "location_forest": "Bizarre Forest"
+  "location_forest": "Bizarre Forest",
+
+  "uiDiaryTitle": "TRAVELER'S NOTES",
+  "diary_day1_title": "Day 1. Arrival",
+  "diary_day1_text": "I found a town. Strange place. A writer gave me this diary. I should buy supplies and check out the forest.",
+  "diary_day2_title": "Day 2. Hospital",
+  "diary_day2_text": "Fell off a cliff. Miraculously alive. My belongings are gone. The doctors say they couldn’t find them.",
+  "diary_quest_title": "QUEST:",
+  "diary_quest_bag": "Return to the place where I fell in the forest and find my belongings!"
 }

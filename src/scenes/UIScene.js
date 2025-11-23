@@ -10,6 +10,7 @@ import { SettingsButton } from '../components/SettingsButton.js';
 import { SettingsMenu } from '../components/SettingsMenu.js';
 import { GameOverScreen } from '../components/GameOverScreen.js';
 import { SaveManager } from '../utils/SaveManager.js';
+import { DiarySystem } from '../components/DiarySystem.js';
 
 export default class UIScene extends Phaser.Scene {
   // UI Components
@@ -20,6 +21,7 @@ export default class UIScene extends Phaser.Scene {
   // Component instances
   healthDisplay;
   inventorySystem;
+  diarySystem;
   backpackButton;
   settingsButton;
   settingsMenu;
@@ -138,6 +140,9 @@ export default class UIScene extends Phaser.Scene {
     this.inventorySystem = new InventorySystem(this);
     this.inventorySystem.create();
 
+    this.diarySystem = new DiarySystem(this);
+    this.diarySystem.create();
+
     // Backpack Button
     this.backpackButton = new BackpackButton(this, 690, 35, () => {
       this.inventorySystem.toggle();
@@ -187,6 +192,8 @@ export default class UIScene extends Phaser.Scene {
         this.settingsMenu.toggle();
       } else if (this.inventorySystem.getIsOpen()) {
         this.inventorySystem.toggle();
+      } else if (this.diarySystem.getIsOpen()) {
+        this.diarySystem.toggle();
       }
     });
 
@@ -222,6 +229,7 @@ export default class UIScene extends Phaser.Scene {
       this.inventorySystem.clearTooltip();
       this.inventorySystem.updateTexts();
     }
+    if (this.diarySystem) this.diarySystem.updateTexts();
 
     SaveManager.save(this);
   }
@@ -332,6 +340,12 @@ export default class UIScene extends Phaser.Scene {
       } else {
         this.handleShowDialog(this.getText('hpFull') || 'HP Full!');
         this.time.delayedCall(1000, () => this.handleHideDialog());
+      }
+    }
+    if (item.id === 'diary') {
+      if (this.diarySystem) {
+        this.inventorySystem.toggle();
+        this.diarySystem.toggle();
       }
     }
   }
