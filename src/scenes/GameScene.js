@@ -26,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
   activeNPC = null;
   isEvening = false;
   isDay2WakeUp = false;
+  isTeleporting = false;
 
   startPosition = { x: 110, y: 150 };
 
@@ -39,7 +40,7 @@ export default class GameScene extends Phaser.Scene {
     if (data.fromForest) {
       this.startPosition = { x: 480, y: 165 };
     } else if (data.isDay2WakeUp) {
-      this.startPosition = { x: 150, y: 150 };
+      this.startPosition = { x: 455, y: 105 };
     } else {
       const hasEntered = this.registry.get('hasEnteredTown');
 
@@ -65,6 +66,7 @@ export default class GameScene extends Phaser.Scene {
     this.setupCollisions();
     this.setupExitZone();
     this.setupUI();
+    this.setupTeleporters();
 
     this.registry.set('hasEnteredTown', true);
     SaveManager.save(this);
@@ -115,15 +117,15 @@ export default class GameScene extends Phaser.Scene {
 
   createNPCs() {
     this.writer = NPCHelper.createNPC(this, 310, 135, 'player_sheet', 99);
-    this.merchant = NPCHelper.createNPC(this, 490, 290, 'player_sheet', 86, true);
-    this.armorer = NPCHelper.createNPC(
+    this.merchant = NPCHelper.createNPC(
       this,
-      185,
-      60,
+      490,
+      290,
       'player_sheet',
-      87,
+      86,
       true,
     );
+    this.armorer = NPCHelper.createNPC(this, 215, 70, 'player_sheet', 87, true);
 
     this.addInteractionHint(this.writer);
     this.addInteractionHint(this.armorer);
@@ -132,20 +134,20 @@ export default class GameScene extends Phaser.Scene {
 
   addInteractionHint(npcSprite) {
     const hint = this.add
-      .text(npcSprite.x, npcSprite.y - 25, '...', {
+      .text(npcSprite.x, npcSprite.y - 17, '...', {
         fontFamily: 'serif',
         fontSize: '20px',
         fontStyle: 'bold',
         fill: '#fff', //ffcc00, ffff00
         stroke: '#000000',
-        strokeThickness: 3,
+        strokeThickness: 2,
       })
       .setOrigin(0.5);
 
     this.tweens.add({
       targets: hint,
-      y: npcSprite.y - 30,
-      duration: 800,
+      y: npcSprite.y - 20,
+      duration: 700,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
@@ -390,6 +392,50 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.activeNPC = 'merchant';
+  }
+
+  setupTeleporters() {
+    const enterZone = this.add.zone(185, 124, 20, 10);
+    this.physics.add.existing(enterZone);
+
+    this.physics.add.overlap(this.player, enterZone, () => {
+      this.teleportPlayer(185, 70);
+    });
+
+    const exitZone = this.add.zone(185, 80, 20, 10);
+    this.physics.add.existing(exitZone);
+
+    this.physics.add.overlap(this.player, exitZone, () => {
+      this.teleportPlayer(185, 130);
+    });
+
+    // DEBUG
+    // this.physics.world.createDebugGraphic();
+  }
+
+  teleportPlayer(targetX, targetY) {
+    if (this.isTeleporting) return;
+    this.isTeleporting = true;
+
+    this.player.setVelocity(0);
+    if (this.player.body) this.player.body.enable = false;
+
+    this.cameras.main.fadeOut(200, 0, 0, 0);
+
+    this.cameras.main.once(
+      Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+      () => {
+        this.player.setPosition(targetX, targetY);
+
+        this.player.body.enable = true;
+
+        this.cameras.main.fadeIn(200, 0, 0, 0);
+
+        this.time.delayedCall(500, () => {
+          this.isTeleporting = false;
+        });
+      },
+    );
   }
 
   handleNoInteraction() {

@@ -10,6 +10,7 @@ export default class TitleScene extends Phaser.Scene {
   create() {
     // --- DEBUG MODE ---
     // this.handleInput();
+    // return;
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;

@@ -125,6 +125,7 @@ export default class ForestScene extends Phaser.Scene {
     const enemyTiles = 'player_sheet';
     const enemyFrame = 122;
 
+    // Enemy On
     for (let i = 0; i < 0; i++) {
       const x = Phaser.Math.Between(100, maxX);
       const y = Phaser.Math.Between(100, bounds.height - margin);
