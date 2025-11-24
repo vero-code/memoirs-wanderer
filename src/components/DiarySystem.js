@@ -41,46 +41,82 @@ export class DiarySystem extends BaseUIComponent {
   refresh() {
     this.entriesContainer.removeAll(true);
 
-    const day = this.scene.registry.get('dayCount') || 1;
-    const itemsLost = this.scene.registry.get('itemsLost');
+    const registry = this.scene.registry;
+    const day = registry.get('dayCount') || 1;
+    const receivedPotato = registry.get('receivedFreePotato');
+    const hasVisitedForest = registry.get('hasVisitedForest');
+    const itemsLost = registry.get('itemsLost');
+
+    const metArmorer = registry.get('metArmorer');
 
     let currentY = this.styles.startY;
     const startX = this.styles.startX;
+    const gap = 20;
 
-    this.addEntry(startX, currentY, 'diary_day1_title', 'diary_day1_text');
-    currentY += 120;
+    currentY = this.addEntry(
+      startX,
+      currentY,
+      'diary_day1_title',
+      'diary_day1_text',
+    );
+    currentY += gap;
 
-    if (day >= 2) {
-      this.addEntry(startX, currentY, 'diary_day2_title', 'diary_day2_text');
-      currentY += 100;
+    if (receivedPotato) {
+      currentY = this.addEntry(startX, currentY, null, 'potato_day1_text');
+      currentY += gap;
     }
 
-    if (itemsLost) {
-      this.addEntry(startX, currentY, 'diary_quest_title', 'diary_quest_bag');
-      currentY += 80;
+    if (metArmorer) {
+      currentY = this.addEntry(startX, currentY, null, 'shield_day1_text');
+      currentY += gap;
+    }
+
+    if (hasVisitedForest) {
+      currentY = this.addEntry(startX, currentY, null, 'forest_day1_text');
+      currentY += gap;
+    }
+
+    if (day >= 2) {
+      currentY = this.addEntry(startX, currentY, null, 'mountains_day1_text');
+      currentY += gap + 10;
+    }
+
+    if (day >= 2 && itemsLost === false) {
+      currentY = this.addEntry(
+        startX,
+        currentY,
+        'rebirth_day2_title',
+        'rebirth_day2_text',
+      );
     }
   }
 
   addEntry(x, y, titleKey, bodyKey) {
     const titleStyle = this.styles.entryTitle;
     const bodyStyle = this.styles.entryBody;
+    let nextY = y;
 
-    const title = this.scene.add.text(x, y, this.getText(titleKey), {
-      fontSize: titleStyle.fontSize,
-      fontStyle: titleStyle.fontStyle,
-      fill: titleStyle.fill,
-      fontFamily: titleStyle.fontFamily,
-    });
+    if (titleKey) {
+      const title = this.scene.add.text(x, nextY, this.getText(titleKey), {
+        fontSize: titleStyle.fontSize,
+        fontStyle: titleStyle.fontStyle,
+        fill: titleStyle.fill,
+        fontFamily: titleStyle.fontFamily,
+      });
+      this.entriesContainer.add(title);
+      nextY += title.height + 5;
+    }
 
-    const body = this.scene.add.text(x, y + 25, this.getText(bodyKey), {
+    const body = this.scene.add.text(x, nextY, this.getText(bodyKey), {
       fontSize: bodyStyle.fontSize,
       fontStyle: bodyStyle.fontStyle,
       fill: bodyStyle.fill,
       fontFamily: bodyStyle.fontFamily,
       wordWrap: { width: bodyStyle.wordWrapWidth },
     });
+    this.entriesContainer.add(body);
 
-    this.entriesContainer.add([title, body]);
+    return nextY + body.height;
   }
 
   createCloseButton() {

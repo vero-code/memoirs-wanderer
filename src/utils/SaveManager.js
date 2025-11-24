@@ -18,6 +18,7 @@ const KEYS_TO_SAVE = [
   'receivedFreePotato',
   'playerCoins',
   'hasVisitedForest',
+  'metArmorer',
   'bag_hasDiary',
   'bag_hasArmor',
   'bag_hasPotato',

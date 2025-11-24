@@ -303,7 +303,9 @@ export default class GameScene extends Phaser.Scene {
 
       SaveManager.save(this);
     } else {
+      this.registry.set('metArmorer', true);
       this.events.emit('show-dialog', this.getText('armorerQuest'));
+      SaveManager.save(this);
     }
 
     this.activeNPC = 'armorer';

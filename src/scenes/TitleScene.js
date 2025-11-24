@@ -88,6 +88,7 @@ export default class TitleScene extends Phaser.Scene {
     this.registry.set('receivedDiary', false);
     this.registry.set('playerCoins', 0);
     this.registry.set('hasVisitedForest', false);
+    this.registry.set('metArmorer', false);
   }
 
   getText(key) {

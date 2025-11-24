@@ -47,9 +47,11 @@
 
   "uiDiaryTitle": "TRAVELER'S NOTES",
   "diary_day1_title": "Day 1. Arrival",
-  "diary_day1_text": "I found a town. Strange place. A writer gave me this diary. I should buy supplies and check out the forest.",
-  "diary_day2_title": "Day 2. Hospital",
-  "diary_day2_text": "Fell off a cliff. Miraculously alive. My belongings are gone. The doctors say they couldn’t find them.",
-  "diary_quest_title": "QUEST:",
-  "diary_quest_bag": "Return to the place where I fell in the forest and find my belongings!"
+  "diary_day1_text": "And here I am in the big town. There wasn’t really anywhere to go, so I visited several houses and shops. In one of the houses, I came across a writer. She gave me an empty journal so that I could record my journey.",
+  "potato_day1_text": "Visited several countryside market stalls. The merchant gave me raw potatoes for growing.",
+  "shield_day1_text": "I stopped by the weaponsmith and told him that I was planning to travel across the square world. He liked my idea and promised to hand me a shield.",
+  "forest_day1_text": "By evening, I had left the city and entered a peculiar forest. I decided to search for a place to settle and develop. Dusk was falling",
+  "mountains_day1_text": "Walking along the road in the peculiar forest, I ran into some enemies. I had to fight them with a stone dagger. I managed to stab one of the enemies almost immediately. However, another one turned out to be stronger, and I had to retreat into the mountains. During my “tactical retreat,” I didn’t notice a stone lying on the ground, tripped over it, tumbled down several blocks, and blacked out.",
+  "rebirth_day2_title": "Day 2. Rebirth",
+  "rebirth_day2_text": "I came to the city’s infirmary in the morning. I had no belongings with me. They said that they might be located below the place where I was found. I spent the first half of the day searching for the spot where I had fallen. Sure enough — all my belongings were there. I spent the rest of the day on the mountain, making entries in my journal. There were no monsters on the slope, and I managed to get some sleep."
 }
