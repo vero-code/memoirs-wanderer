@@ -6,6 +6,8 @@ export class DiarySystem extends BaseUIComponent {
   constructor(scene) {
     super(scene, DIARY_LAYOUT, DIARY_STYLES);
     this.entriesContainer = null;
+    this.contentHeight = 0;
+    this.maskGraphics = null;
   }
 
   create() {
@@ -23,6 +25,53 @@ export class DiarySystem extends BaseUIComponent {
     this.entriesContainer = this.scene.add.container(0, 0);
     this.container.add(this.entriesContainer);
     this.createCloseButton();
+    this.setupScrolling();
+  }
+
+  setupScrolling() {
+    const viewport = this.layout.viewport;
+
+    const maskX = this.layout.position.x - viewport.width / 2;
+    const maskY = this.layout.position.y + viewport.y;
+
+    this.maskGraphics = this.scene.make.graphics();
+    this.maskGraphics.fillStyle(0xffffff);
+    this.maskGraphics.fillRect(maskX, maskY, viewport.width, viewport.height);
+
+    const mask = this.maskGraphics.createGeometryMask();
+
+    this.entriesContainer.setMask(mask);
+
+    this.scene.input.on(
+      'wheel',
+      (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+        if (this.isOpen) {
+          this.scroll(deltaY);
+        }
+      },
+    );
+  }
+
+  scroll(deltaY) {
+    const viewportHeight = this.layout.viewport.height;
+
+    if (this.contentHeight <= viewportHeight) {
+      this.entriesContainer.y = this.layout.viewport.y;
+      return;
+    }
+
+    const scrollSpeed = 0.5;
+    this.entriesContainer.y -= deltaY * scrollSpeed;
+
+    const topBound = this.layout.viewport.y;
+    if (this.entriesContainer.y > topBound) {
+      this.entriesContainer.y = topBound;
+    }
+
+    const bottomBound = topBound - (this.contentHeight - viewportHeight) - 20;
+    if (this.entriesContainer.y < bottomBound) {
+      this.entriesContainer.y = bottomBound;
+    }
   }
 
   createTitle() {
@@ -49,7 +98,7 @@ export class DiarySystem extends BaseUIComponent {
 
     const metArmorer = registry.get('metArmorer');
 
-    let currentY = this.styles.startY;
+    let currentY = 0;
     const startX = this.styles.startX;
     const gap = 20;
 
@@ -89,6 +138,9 @@ export class DiarySystem extends BaseUIComponent {
         'rebirth_day2_text',
       );
     }
+
+    this.contentHeight = currentY;
+    this.entriesContainer.y = this.layout.viewport.y;
   }
 
   addEntry(x, y, titleKey, bodyKey) {

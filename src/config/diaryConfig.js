@@ -11,6 +11,11 @@ export const DIARY_LAYOUT = {
     strokeWidth: 4,
     strokeColor: 0x5c4033,
   },
+  viewport: {
+    width: 460,
+    height: 300,
+    y: -130,
+  }
 };
 
 export const DIARY_STYLES = {
@@ -45,5 +50,5 @@ export const DIARY_STYLES = {
   },
   lineSpacing: 10,
   startX: -220,
-  startY: -120,
+  startY: 0,
 };
