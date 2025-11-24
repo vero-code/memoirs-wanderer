@@ -22,6 +22,7 @@ export class DiarySystem extends BaseUIComponent {
 
     this.entriesContainer = this.scene.add.container(0, 0);
     this.container.add(this.entriesContainer);
+    this.createCloseButton();
   }
 
   createTitle() {
@@ -80,6 +81,33 @@ export class DiarySystem extends BaseUIComponent {
     });
 
     this.entriesContainer.add([title, body]);
+  }
+
+  createCloseButton() {
+    const style = this.styles.closeButton;
+
+    const closeBtn = this.scene.add
+      .text(style.x, style.y, style.text, {
+        fontSize: style.fontSize,
+        fontStyle: style.fontStyle,
+        fill: style.fill,
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    closeBtn.on('pointerover', () => {
+      closeBtn.setStyle({ fill: style.fillHover });
+    });
+
+    closeBtn.on('pointerout', () => {
+      closeBtn.setStyle({ fill: style.fill });
+    });
+
+    closeBtn.on('pointerdown', () => {
+      this.toggle();
+    });
+
+    this.container.add(closeBtn);
   }
 
   toggle() {

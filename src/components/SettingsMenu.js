@@ -32,6 +32,7 @@ export class SettingsMenu extends BaseUIComponent {
     this.createLanguageButton();
     this.createControlsSection();
     this.createResetButton();
+    this.createCloseButton();
   }
 
   createTitle() {
@@ -162,6 +163,34 @@ export class SettingsMenu extends BaseUIComponent {
     });
 
     this.container.add(this.resetButton);
+  }
+
+  createCloseButton() {
+    const styles = this.styles || {};
+    const style = styles.closeButton || { x: 140, y: -155, text: 'X' };
+
+    const closeBtn = this.scene.add
+      .text(style.x, style.y, style.text, {
+        fontSize: style.fontSize || '24px',
+        fontStyle: style.fontStyle || 'bold',
+        fill: style.fill || '#ffffff',
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    closeBtn.on('pointerover', () => {
+      closeBtn.setStyle({ fill: style.fillHover || '#ff0000' });
+    });
+
+    closeBtn.on('pointerout', () => {
+      closeBtn.setStyle({ fill: style.fill || '#ffffff' });
+    });
+
+    closeBtn.on('pointerdown', () => {
+      this.toggle();
+    });
+
+    this.container.add(closeBtn);
   }
 
   updateTexts() {

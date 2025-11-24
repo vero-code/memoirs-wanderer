@@ -52,6 +52,15 @@ export const SETTINGS_STYLES = {
     fillHover: '#ff0000',
     offsetY: 150,
   },
+  closeButton: {
+    text: '✕',
+    fontSize: '18px',
+    fontStyle: 'bold',
+    fill: '#ffffff',
+    fillHover: '#ff4444',
+    x: 140,
+    y: -155,
+  },
 };
 
 export const CONTROLS_CONFIG = [

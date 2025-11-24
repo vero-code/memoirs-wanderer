@@ -30,6 +30,7 @@ export class InventorySystem extends BaseUIComponent {
     this.createTitle();
     this.createSlots();
     this.createTooltip();
+    this.createCloseButton();
   }
 
   createTitle() {
@@ -188,6 +189,33 @@ export class InventorySystem extends BaseUIComponent {
     if (this.tooltipText) {
       this.tooltipText.setText('');
     }
+  }
+
+  createCloseButton() {
+    const style = INVENTORY_STYLES.closeButton;
+
+    const closeBtn = this.scene.add
+      .text(style.x, style.y, style.text, {
+        fontSize: style.fontSize,
+        fontStyle: style.fontStyle,
+        fill: style.fill,
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    closeBtn.on('pointerover', () => {
+      closeBtn.setStyle({ fill: style.fillHover });
+    });
+
+    closeBtn.on('pointerout', () => {
+      closeBtn.setStyle({ fill: style.fill });
+    });
+
+    closeBtn.on('pointerdown', () => {
+      this.toggle();
+    });
+
+    this.container.add(closeBtn);
   }
 
   updateTexts() {

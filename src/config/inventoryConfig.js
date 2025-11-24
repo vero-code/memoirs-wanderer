@@ -37,6 +37,15 @@ export const INVENTORY_STYLES = {
     hoverScale: 1.2,
     normalScale: 1,
   },
+  closeButton: {
+    text: '✕',
+    fontSize: '18px',
+    fontStyle: 'bold',
+    fill: '#ffffff',
+    fillHover: '#ff4444',
+    x: 160,
+    y: -130,
+  },
   itemCount: {
     fontSize: '14px',
     fontStyle: 'bold',
