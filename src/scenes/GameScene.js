@@ -47,7 +47,7 @@ export default class GameScene extends Phaser.Scene {
       if (hasEntered) {
         this.startPosition = { x: 185, y: 182 };
       } else {
-        this.startPosition = { x: 24, y: 35 };
+        this.startPosition = { x: 24, y: 50 };
       }
     }
   }

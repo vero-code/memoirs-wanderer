@@ -61,13 +61,17 @@ export default class TitleScene extends Phaser.Scene {
 
   handleInput() {
     const hasSave = SaveManager.load(this);
-
     if (hasSave) {
-      this.scene.start('GameScene');
+      const currentHealth = this.registry.get('playerHealth');
+      if (!currentHealth || currentHealth <= 0) {
+          SaveManager.clear(); 
+          this.initNewGame(); 
+          this.scene.start('GameScene');
+      } else {
+          this.scene.start('GameScene');
+      }
     } else {
       this.initNewGame();
-
-      // --- DEBUG MODE ---
       this.scene.start('IntroScene');
       // this.scene.start('GameScene');
     }
