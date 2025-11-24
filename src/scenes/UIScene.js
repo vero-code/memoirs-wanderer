@@ -202,6 +202,18 @@ export default class UIScene extends Phaser.Scene {
       SaveManager.clear();
       location.reload();
     });
+
+    this.input.keyboard.on('keydown-J', () => {
+      const hasDiary = this.registry.get('hasDiary');
+      if (hasDiary) {
+        if (this.inventorySystem.getIsOpen()) {
+          this.inventorySystem.toggle();
+        }
+        if (this.diarySystem) {
+          this.diarySystem.toggle();
+        }
+      }
+    });
   }
 
   // --- LANGUAGE ---

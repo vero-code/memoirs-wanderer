@@ -20,6 +20,7 @@
   "merchantNoMoney": "You don’t have enough coins! Come back when you're richer.",
 
   "uiDiary": "Diary (click to read)",
+  "uiDiarySettings": "Diary",
   "uiArmor": "Armor",
   "uiPotato": "Potato (+2 to health)",
   "uiStone": "Stone",
@@ -31,7 +32,7 @@
   "uiAttack": "Attack",
   "uiInventory": "Inventory",
   "uiClose": "Close tab",
-  "uiStartOver": "Start Over",
+  "uiStartOver": "Start Over (F9)",
   "uiStartOverConfirm": "Are you sure?",
 
   "heroThoughts_cantLeave": "(Thoughts): I can't leave without a diary. I need to record everything.",

@@ -26,11 +26,11 @@ export const SETTINGS_STYLES = {
     offsetY: -140,
   },
   languageButton: {
-    fontSize: '20px',
+    fontSize: '18px',
     fill: '#ffff00',
     fillHover: '#ffffff',
     backgroundColor: '#333333',
-    padding: { x: 10, y: 5 },
+    padding: { x: 10, y: 0 },
     offsetY: -90,
   },
   controlKeys: {
@@ -44,9 +44,9 @@ export const SETTINGS_STYLES = {
     offsetX: 140,
   },
   controlSpacing: 40,
-  controlStartY: -30,
+  controlStartY: -50,
   resetButton: {
-    fontSize: '20px',
+    fontSize: '16px',
     fontStyle: 'bold',
     fill: '#ff4444',
     fillHover: '#ff0000',
@@ -67,5 +67,6 @@ export const CONTROLS_CONFIG = [
   { keys: 'WASD / ⬆️⬇️⬅️➡️', localeKey: 'uiMove' },
   { keys: 'SPACE', localeKey: 'uiAttack' },
   { keys: 'I / Mouse 🖱️', localeKey: 'uiInventory' },
+  { keys: 'J', localeKey: 'uiDiarySettings' },
   { keys: 'Esc', localeKey: 'uiClose' },
 ];
