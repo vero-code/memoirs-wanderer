@@ -230,6 +230,26 @@ export default class UIScene extends Phaser.Scene {
         }
       }
     });
+
+    // --- DEV MODE ---
+    this.input.keyboard.on('keydown-F2', () => {
+      console.log('DEBUG: Granting Quest Items...');
+      this.registry.set('hasDiary', true);
+      this.registry.set('receivedDiary', true);
+      this.events.emit('get-diary');
+      let currentPotato = this.registry.get('hasPotato');
+      if (typeof currentPotato !== 'number') currentPotato = 0;
+      this.registry.set('hasPotato', currentPotato + 1);
+      this.registry.set('receivedFreePotato', true);
+      this.events.emit('get-potato');
+      SaveManager.save(this);
+    });
+
+    this.input.keyboard.on('keydown-F3', () => {
+      console.log('DEBUG: Teleporting to Forest...');
+      this.scene.stop('GameScene');
+      this.scene.start('ForestScene');
+    });
   }
 
   // --- LANGUAGE ---
