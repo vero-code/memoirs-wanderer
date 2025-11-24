@@ -27,8 +27,8 @@ export default class PreloaderScene extends Phaser.Scene {
 
       let currentLang = this.registry.get('current_lang');
       if (!currentLang) {
-          currentLang = 'en';
-          this.registry.set('current_lang', 'en');
+        currentLang = 'en';
+        this.registry.set('current_lang', 'en');
       }
 
       const localeData = this.cache.json.get(`locale_${currentLang}`);
@@ -45,6 +45,8 @@ export default class PreloaderScene extends Phaser.Scene {
       'map_dungeon',
       'assets/tilesets/dungeon_map.json',
     );
+
+    this.load.tilemapTiledJSON('map_forest', 'assets/tilesets/forest_map.json');
 
     this.load.spritesheet(
       'player_sheet',
@@ -66,6 +68,12 @@ export default class PreloaderScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16,
       spacing: 1,
+    });
+
+    this.load.spritesheet('battle_sheet', 'assets/tilesets/tiny_battle_tiles.png', {
+      frameWidth: 16,
+      frameHeight: 16,
+      spacing: 1
     });
   }
 }

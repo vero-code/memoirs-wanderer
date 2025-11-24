@@ -50,14 +50,14 @@ export default class ForestScene extends Phaser.Scene {
   }
 
   createWorld() {
-    // Ground tiles
-    for (let x = 0; x < 50; x++) {
-      for (let y = 0; y < 50; y++) {
-        this.add.image(x * 16, y * 16, 'town_sheet', 0).setOrigin(0);
-      }
-    }
+    const map = this.make.tilemap({ key: 'map_forest' });
+    const tileset = map.addTilesetImage('Tilemap', 'battle_sheet');
 
-    this.physics.world.setBounds(0, 0, 800, 800);
+    const groundLayer = map.createLayer('Terrain', tileset, 0, 0);
+    if (groundLayer) groundLayer.setDepth(0);
+
+    this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
     // --- TREES ---
     this.trees = this.physics.add.staticGroup();

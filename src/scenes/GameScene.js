@@ -115,11 +115,11 @@ export default class GameScene extends Phaser.Scene {
 
   createNPCs() {
     this.writer = NPCHelper.createNPC(this, 310, 135, 'player_sheet', 99);
-    this.merchant = NPCHelper.createNPC(this, 185, 60, 'player_sheet', 86, true);
+    this.merchant = NPCHelper.createNPC(this, 490, 290, 'player_sheet', 86, true);
     this.armorer = NPCHelper.createNPC(
       this,
-      490,
-      290,
+      185,
+      60,
       'player_sheet',
       87,
       true,
