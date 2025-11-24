@@ -62,11 +62,18 @@ export default class GameScene extends Phaser.Scene {
     this.createWorld();
     this.createPlayer();
     this.createNPCs();
+    const isFirstTime = !this.registry.get('hasEnteredTown');
     this.setupCamera();
     this.setupCollisions();
     this.setupExitZone();
-    this.setupUI();
     this.setupTeleporters();
+    this.setupUI();
+
+    if (isFirstTime) {
+      this.playOpeningAnimation();
+    } else {
+      this.cameras.main.fadeIn(500, 0, 0, 0);
+    }
 
     this.registry.set('hasEnteredTown', true);
     SaveManager.save(this);
@@ -477,6 +484,36 @@ export default class GameScene extends Phaser.Scene {
           this.currentThought.destroy();
           this.currentThought = null;
         }
+      },
+    });
+  }
+
+  playOpeningAnimation() {
+    const spotLight = this.make.graphics({
+      x: this.player.x,
+      y: this.player.y,
+      add: false,
+    });
+
+    spotLight.fillStyle(0xffffff);
+    spotLight.fillCircle(0, 0, 30);
+
+    const mask = new Phaser.Display.Masks.GeometryMask(this, spotLight);
+    this.cameras.main.setMask(mask);
+    this.cameras.main.setBackgroundColor('#000000');
+
+    this.tweens.add({
+      targets: spotLight,
+      scale: 40,
+      duration: 3000,
+      ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        spotLight.x = this.player.x;
+        spotLight.y = this.player.y;
+      },
+      onComplete: () => {
+        this.cameras.main.clearMask();
+        spotLight.destroy();
       },
     });
   }
