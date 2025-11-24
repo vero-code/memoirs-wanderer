@@ -50,6 +50,7 @@ export default class UIScene extends Phaser.Scene {
     this.applyInitialTimeOfDay();
     this.connectGameSceneEvents();
     this.setupKeyboardShortcuts();
+    this.events.off('inventory-item-use');
     this.events.on('inventory-item-use', this.handleItemUse, this);
     if (this.initialLocationKey && this.locationText) {
       this.setLocation(this.initialLocationKey);
@@ -330,6 +331,8 @@ export default class UIScene extends Phaser.Scene {
   }
 
   handleItemUse(item) {
+    console.log('Item clicked:', item.id);
+
     if (item.id === 'potato') {
       const healed = this.healthDisplay.heal(1);
       if (healed) {
@@ -343,9 +346,14 @@ export default class UIScene extends Phaser.Scene {
       }
     }
     if (item.id === 'diary') {
+      console.log('Diary detected!');
+
       if (this.diarySystem) {
+        console.log('Toggling systems...');
         this.inventorySystem.toggle();
         this.diarySystem.toggle();
+      } else {
+        console.error('DiarySystem is missing!');
       }
     }
   }
