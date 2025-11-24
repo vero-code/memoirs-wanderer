@@ -56,17 +56,26 @@ export default class ForestScene extends Phaser.Scene {
     const groundLayer = map.createLayer('Terrain', tileset, 0, 0);
     if (groundLayer) groundLayer.setDepth(0);
 
-    this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    const mapWidth = map.widthInPixels;
+    const mapHeight = map.heightInPixels;
+
+    this.physics.world.setBounds(0, 0, mapWidth, mapHeight);
+    this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
+
+    const margin = 10;
+    const playerSafeRadius = 5;
 
     // --- TREES ---
     this.trees = this.physics.add.staticGroup();
-    for (let i = 0; i < 40; i++) {
-      const x = Phaser.Math.Between(50, 750);
-      const y = Phaser.Math.Between(50, 750);
-      if (Phaser.Math.Distance.Between(x, y, 20, 100) > 50) {
-        const tree = this.trees.create(x, y, 'town_sheet', 5);
-        tree.body.setSize(10, 10);
+    const treeCount = 50;
+    const treeTiles = 'town_sheet';
+    const treeFrame = 5;
+
+    for (let i = 0; i < treeCount; i++) {
+      const x = Phaser.Math.Between(margin, mapWidth - margin);
+      const y = Phaser.Math.Between(margin, mapHeight - margin);
+      if (Phaser.Math.Distance.Between(x, y, 20, 100) > playerSafeRadius) {
+        const tree = this.trees.create(x, y, treeTiles, treeFrame);
         tree.body.setOffset(3, 3);
         tree.setDepth(y);
       }
@@ -74,11 +83,15 @@ export default class ForestScene extends Phaser.Scene {
 
     // --- STONES ---
     this.stones = this.add.group();
-    for (let i = 0; i < 15; i++) {
-      const x = Phaser.Math.Between(50, 750);
-      const y = Phaser.Math.Between(50, 750);
-      if (Phaser.Math.Distance.Between(x, y, 20, 100) > 50) {
-        const stone = new Stone(this, x, y, 'tiny_ski', 81);
+    const stoneCount = 20;
+    const stoneTiles = 'tiny_ski';
+    const stoneFrame = 81;
+
+    for (let i = 0; i < stoneCount; i++) {
+      const x = Phaser.Math.Between(margin, mapWidth - margin);
+      const y = Phaser.Math.Between(margin, mapHeight - margin);
+      if (Phaser.Math.Distance.Between(x, y, 20, 100) > playerSafeRadius) {
+        const stone = new Stone(this, x, y, stoneTiles, stoneFrame);
         this.stones.add(stone);
       }
     }
@@ -92,32 +105,54 @@ export default class ForestScene extends Phaser.Scene {
 
   createEnemies() {
     this.enemies = this.add.group();
+
+    const bounds = this.physics.world.bounds;
+    const margin = 50;
+
+    // --- ENEMIES ---
+    const enemyTiles = 'player_sheet';
+    const enemyFrame = 122;
+
     for (let i = 0; i < 2; i++) {
-      const x = Phaser.Math.Between(100, 700);
-      const y = Phaser.Math.Between(200, 700);
-      const zombie = new Enemy(this, x, y, 'player_sheet', 122, this.player);
-      zombie.setDepth(zombie.y);
-      this.enemies.add(zombie);
+      const x = Phaser.Math.Between(100, bounds.width - margin);
+      const y = Phaser.Math.Between(100, bounds.height - margin);
+
+      const enemy = new Enemy(this, x, y, enemyTiles, enemyFrame, this.player);
+      enemy.setDepth(enemy.y);
+      this.enemies.add(enemy);
     }
   }
 
   createAmbushBushes() {
     this.ambushBushes = this.add.group({ runChildUpdate: true });
+    const bounds = this.physics.world.bounds;
 
-    for (let i = 0; i < 15; i++) {
-      const x = Phaser.Math.Between(100, 750);
-      const y = Phaser.Math.Between(50, 750);
-      const bush = new AmbushBush(
-        this,
-        x,
-        y,
-        'town_sheet',
-        5,
-        this.player,
-        this.enemies,
-      );
-      bush.setDepth(bush.y);
-      this.ambushBushes.add(bush);
+    const margin = 10;
+    const playerSafeRadius = 20;
+
+    // --- BUSHES ---
+    const bushCount = 15;
+    const bushTiles = 'town_sheet';
+    const bushFrame = 5;
+
+    for (let i = 0; i < bushCount; i++) {
+      const x = Phaser.Math.Between(margin, bounds.width - margin);
+      const y = Phaser.Math.Between(margin, bounds.height - margin);
+
+      // Safety check (to avoid appearing on the player's head)
+      if (Phaser.Math.Distance.Between(x, y, 20, 100) > playerSafeRadius) {
+        const bush = new AmbushBush(
+          this,
+          x,
+          y,
+          bushTiles,
+          bushFrame,
+          this.player,
+          this.enemies,
+        );
+        bush.setDepth(bush.y);
+        this.ambushBushes.add(bush);
+      }
     }
   }
 
@@ -291,10 +326,11 @@ export default class ForestScene extends Phaser.Scene {
   }
 
   createFallTrigger() {
-    const mapWidth = 800;
-    const mapHeight = 800;
-    const cliffX = 700;
-    const gapY = 400;
+    const mapWidth = this.physics.world.bounds.width;
+    const mapHeight = this.physics.world.bounds.height;
+
+    const cliffX = mapWidth - 100;
+    const gapY = mapHeight / 2;
     const gapSize = 30;
 
     for (let y = 0; y < mapHeight; y += 32) {
@@ -381,7 +417,13 @@ export default class ForestScene extends Phaser.Scene {
     const itemsLost = this.registry.get('itemsLost');
 
     if (itemsLost) {
-      const bag = this.physics.add.sprite(750, 400, 'town_sheet', 29);
+      const mapWidth = this.physics.world.bounds.width;
+      const mapHeight = this.physics.world.bounds.height;
+
+      const bagX = mapWidth - 120;
+      const bagY = mapHeight / 2;
+
+      const bag = this.physics.add.sprite(bagX, bagY, 'town_sheet', 29);
 
       this.physics.add.overlap(this.player, bag, () => {
         this.collectBag(bag);
