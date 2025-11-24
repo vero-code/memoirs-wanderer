@@ -76,19 +76,7 @@ export default class UIScene extends Phaser.Scene {
     this.createDayText();
     this.createCoinText();
     this.createLocationText();
-  }
-
-  createLocationText() {
-    this.locationText = this.add
-      .text(20, 60, '', {
-        fontFamily: 'serif',
-        fontSize: '18px',
-        fontStyle: 'italic',
-        fill: '#aaaaaa',
-        stroke: '#000000',
-        strokeThickness: 2,
-      })
-      .setDepth(100);
+    this.createVersionText();
   }
 
   createDialogText() {
@@ -131,6 +119,34 @@ export default class UIScene extends Phaser.Scene {
       })
       .setOrigin(1, 0.5);
     this.coinText.setDepth(100);
+  }
+
+  createLocationText() {
+    this.locationText = this.add
+      .text(20, 60, '', {
+        fontFamily: 'serif',
+        fontSize: '18px',
+        fontStyle: 'italic',
+        fill: '#aaaaaa',
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      .setDepth(100);
+  }
+
+  createVersionText() {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+
+    this.versionText = this.add
+      .text(width - 10, height - 10, this.getText('uiCredits'), {
+        fontSize: '12px',
+        fontFamily: 'monospace',
+        fill: '#ffffff',
+        alpha: 0.5,
+      })
+      .setOrigin(1, 1)
+      .setDepth(90);
   }
 
   createComponents() {
@@ -243,6 +259,8 @@ export default class UIScene extends Phaser.Scene {
       this.inventorySystem.updateTexts();
     }
     if (this.diarySystem) this.diarySystem.updateTexts();
+
+    if (this.versionText) this.versionText.setText(this.getText('uiCredits'));
 
     SaveManager.save(this);
   }
