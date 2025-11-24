@@ -124,6 +124,32 @@ export default class GameScene extends Phaser.Scene {
       true,
     );
     this.merchant = NPCHelper.createNPC(this, 450, 300, 'player_sheet', 86);
+
+    this.addInteractionHint(this.writer);
+    this.addInteractionHint(this.armorer);
+    this.addInteractionHint(this.merchant);
+  }
+
+  addInteractionHint(npcSprite) {
+    const hint = this.add
+      .text(npcSprite.x, npcSprite.y - 25, '...', {
+        fontFamily: 'serif',
+        fontSize: '20px',
+        fontStyle: 'bold',
+        fill: '#fff', //ffcc00, ffff00
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
+
+    this.tweens.add({
+      targets: hint,
+      y: npcSprite.y - 30,
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
   }
 
   setupCamera() {
