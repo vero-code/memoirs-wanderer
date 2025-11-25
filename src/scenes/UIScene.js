@@ -220,13 +220,16 @@ export default class UIScene extends Phaser.Scene {
     });
 
     this.input.keyboard.on('keydown-J', () => {
-      const hasDiary = this.registry.get('hasDiary');
-      if (hasDiary) {
-        if (this.inventorySystem.getIsOpen()) {
-          this.inventorySystem.toggle();
-        }
-        if (this.diarySystem) {
-          this.diarySystem.toggle();
+      if (!this.settingsMenu.getIsOpen()) {
+        const hasDiary = this.registry.get('hasDiary');
+        if (hasDiary) {
+          this.sound.play('sfx_diary');
+          if (this.inventorySystem.getIsOpen()) {
+            this.inventorySystem.toggle();
+          }
+          if (this.diarySystem) {
+            this.diarySystem.toggle();
+          }
         }
       }
     });
@@ -385,8 +388,6 @@ export default class UIScene extends Phaser.Scene {
   }
 
   handleItemUse(item) {
-    console.log('Item clicked:', item.id);
-
     if (item.id === 'potato') {
       const healed = this.healthDisplay.heal(1);
       if (healed) {
@@ -400,14 +401,10 @@ export default class UIScene extends Phaser.Scene {
       }
     }
     if (item.id === 'diary') {
-      console.log('Diary detected!');
-
       if (this.diarySystem) {
-        console.log('Toggling systems...');
+        this.sound.play('sfx_diary');
         this.inventorySystem.toggle();
         this.diarySystem.toggle();
-      } else {
-        console.error('DiarySystem is missing!');
       }
     }
   }

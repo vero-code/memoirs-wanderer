@@ -78,5 +78,7 @@ export default class PreloaderScene extends Phaser.Scene {
 
     this.load.audio('sfx_door_open', 'assets/audio/doorOpen_2.ogg');
     this.load.audio('sfx_step', 'assets/audio/footstep04.ogg');
+    this.load.audio('sfx_diary', 'assets/audio/cloth4.ogg');
+    this.load.audio('sfx_page', 'assets/audio/bookFlip2.ogg');
   }
 }

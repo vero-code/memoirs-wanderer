@@ -8,6 +8,7 @@ export class DiarySystem extends BaseUIComponent {
     this.entriesContainer = null;
     this.contentHeight = 0;
     this.maskGraphics = null;
+    this.lastScrollSoundTime = 0;
   }
 
   create() {
@@ -58,6 +59,16 @@ export class DiarySystem extends BaseUIComponent {
     if (this.contentHeight <= viewportHeight) {
       this.entriesContainer.y = this.layout.viewport.y;
       return;
+    }
+
+    // --- SOUND LOGIC ---
+    const now = this.scene.time.now;
+    if (now > this.lastScrollSoundTime + 150) {
+      this.scene.sound.play('sfx_page', {
+        volume: 0.5,
+        rate: Phaser.Math.FloatBetween(0.9, 1.1),
+      });
+      this.lastScrollSoundTime = now;
     }
 
     const scrollSpeed = 0.5;
@@ -192,6 +203,7 @@ export class DiarySystem extends BaseUIComponent {
     });
 
     closeBtn.on('pointerdown', () => {
+      this.scene.sound.play('sfx_diary');
       this.toggle();
     });
 
