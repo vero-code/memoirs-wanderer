@@ -254,8 +254,7 @@ export default class UIScene extends Phaser.Scene {
       SaveManager.save(this);
     });
 
-    this.input.keyboard.on('keydown-F3', () => {
-      console.log('DEBUG: Teleporting to Forest...');
+    this.input.keyboard.on('keydown-F4', () => {
       this.scene.stop('GameScene');
       this.scene.start('ForestScene');
     });
@@ -396,6 +395,7 @@ export default class UIScene extends Phaser.Scene {
     if (item.id === 'potato') {
       const healed = this.healthDisplay.heal(1);
       if (healed) {
+        this.sound.play('sfx_eat');
         const currentCount = this.registry.get('hasPotato');
         const newCount = currentCount - 1;
         this.registry.set('hasPotato', newCount > 0 ? newCount : false);

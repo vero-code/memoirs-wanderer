@@ -354,6 +354,7 @@ export default class ForestScene extends Phaser.Scene {
     this.physics.add.existing(zone, true);
 
     this.physics.add.overlap(this.player, zone, () => {
+      this.sound.play('sfx_cliff', { volume: 0.6 });
       this.handleFall();
     });
   }

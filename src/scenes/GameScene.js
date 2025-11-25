@@ -294,6 +294,7 @@ export default class GameScene extends Phaser.Scene {
       this.hasDiary = true;
       this.justGotDiary = true;
 
+      this.sound.play('sfx_item_get', { volume: 0.6 });
       this.registry.set('hasDiary', true);
       this.registry.set('receivedDiary', true);
 
@@ -332,6 +333,7 @@ export default class GameScene extends Phaser.Scene {
       this.registry.set('hasStone', stonesLeft > 0 ? stonesLeft : false);
 
       this.justGotArmor = true;
+      this.sound.play('sfx_item_get', { volume: 0.6 });
 
       this.events.emit('get-armor');
       this.events.emit('get-stone');
@@ -363,6 +365,7 @@ export default class GameScene extends Phaser.Scene {
       this.registry.set('hasPotato', true);
       this.registry.set('receivedFreePotato', true);
       this.events.emit('get-potato');
+      this.sound.play('sfx_item_get', { volume: 0.6 });
 
       if (!this.isEvening) {
         this.setEveningFirstTime();
