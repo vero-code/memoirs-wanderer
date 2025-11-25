@@ -424,6 +424,8 @@ export default class GameScene extends Phaser.Scene {
     if (this.isTeleporting) return;
     this.isTeleporting = true;
 
+    this.sound.play('sfx_door_open', { volume: 0.5 });
+
     this.player.setVelocity(0);
     if (this.player.body) this.player.body.enable = false;
 

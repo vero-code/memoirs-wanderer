@@ -6,8 +6,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   spaceKey;
   isAttacking = false;
   lastDirection = 'down';
-
   toolSprite;
+  nextStepTime = 0;
 
   constructor(scene, x, y, texture, frame) {
     super(scene, x, y, texture, frame);
@@ -73,6 +73,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.body.velocity.normalize().scale(speed);
 
+    // --- FOOTSTEPS SOUND LOGIC ---
+    const isMoving = this.body.velocity.x !== 0 || this.body.velocity.y !== 0;
+    if (isMoving) {
+      if (this.scene.time.now > this.nextStepTime) {
+        this.scene.sound.play('sfx_step', {
+          volume: 0.3,
+          rate: Phaser.Math.FloatBetween(0.9, 1.1),
+        });
+
+        this.nextStepTime = this.scene.time.now + 500;
+      }
+    }
+
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
       this.attack();
     }
@@ -90,7 +103,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       offsetX = -12;
       this.toolSprite.setFlipX(false);
       this.toolSprite.setDepth(this.depth + 1);
-    } else if (this.lastDirection === 'right' || this.lastDirection === 'down') {
+    } else if (
+      this.lastDirection === 'right' ||
+      this.lastDirection === 'down'
+    ) {
       offsetX = 12;
       this.toolSprite.setFlipX(true);
       this.toolSprite.setDepth(this.depth + 1);

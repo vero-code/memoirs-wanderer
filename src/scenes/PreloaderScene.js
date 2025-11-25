@@ -75,5 +75,8 @@ export default class PreloaderScene extends Phaser.Scene {
       frameHeight: 16,
       spacing: 1
     });
+
+    this.load.audio('sfx_door_open', 'assets/audio/doorOpen_2.ogg');
+    this.load.audio('sfx_step', 'assets/audio/footstep04.ogg');
   }
 }
