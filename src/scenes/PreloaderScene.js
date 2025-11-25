@@ -85,5 +85,7 @@ export default class PreloaderScene extends Phaser.Scene {
     this.load.audio('sfx_stone_break', 'assets/audio/metalClick.ogg');
     this.load.audio('sfx_bag', 'assets/audio/dropLeather.ogg');
     this.load.audio('sfx_click', 'assets/audio/switch_001.ogg');
+    this.load.audio('sfx_lose', 'assets/audio/jingles_SAX07.ogg');
+    this.load.audio('sfx_hurt', 'assets/audio/laser1.ogg');
   }
 }

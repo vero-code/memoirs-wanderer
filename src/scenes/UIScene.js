@@ -378,9 +378,12 @@ export default class UIScene extends Phaser.Scene {
   }
 
   handlePlayerHit() {
+    this.sound.play('sfx_hurt', { volume: 0.5 });
     const isDead = this.healthDisplay.takeDamage();
     SaveManager.save(this);
     if (isDead) {
+      this.game.sound.stopAll();
+      this.sound.play('sfx_lose', { volume: 0.6 });
       this.triggerGameOver();
     }
   }
