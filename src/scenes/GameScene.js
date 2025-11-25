@@ -211,11 +211,13 @@ export default class GameScene extends Phaser.Scene {
 
       let missingItemTextKey = null;
 
-      if (!this.hasDiary) {
-        missingItemTextKey = 'heroThoughts_cantLeave';
-      } else if (!this.hasPotato) {
-        const hasVisited = this.registry.get('hasVisitedForest');
+      const hasDiary = this.registry.get('hasDiary');
+      const hasPotato = this.registry.get('hasPotato');
 
+      if (!hasDiary) {
+        missingItemTextKey = 'heroThoughts_cantLeave';
+      } else if (!hasPotato) {
+        const hasVisited = this.registry.get('hasVisitedForest');
         if (!hasVisited) {
           missingItemTextKey = 'heroThoughts_needPotato';
         }
