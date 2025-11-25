@@ -140,7 +140,7 @@ export default class ForestScene extends Phaser.Scene {
     this.ambushBushes = this.add.group({ runChildUpdate: true });
     const bounds = this.physics.world.bounds;
     const margin = 10;
-    const playerSafeRadius = 20;
+    const playerSafeRadius = 100;
     const safeZoneRight = 4 * 16;
     const maxX = bounds.width - safeZoneRight - margin;
     // --- BUSHES ---

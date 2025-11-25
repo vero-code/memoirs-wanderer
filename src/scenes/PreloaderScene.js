@@ -90,6 +90,6 @@ export default class PreloaderScene extends Phaser.Scene {
     this.load.audio('sfx_item_get', 'assets/audio/impactGlass_heavy_001.ogg');
     this.load.audio('sfx_eat', 'assets/audio/card-shuffle.ogg');
     this.load.audio('sfx_cliff', 'assets/audio/dice-shake-2.ogg');
-    this.load.audio('sfx_attack', 'assets/audio/knifeSlice.ogg');
+    this.load.audio('sfx_attack', 'assets/audio/drawKnife2.ogg');
   }
 }

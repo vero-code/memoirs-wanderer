@@ -78,7 +78,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (isMoving) {
       if (this.scene.time.now > this.nextStepTime) {
         this.scene.sound.play('sfx_step', {
-          volume: 0.3,
+          volume: 0.1,
           rate: Phaser.Math.FloatBetween(0.9, 1.1),
         });
 
@@ -142,13 +142,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
     this.isAttacking = true;
     this.setVelocity(0);
-
-    if (this.scene.sys.settings.key === 'ForestScene') {
-      this.scene.sound.play('sfx_attack', {
-        volume: 0.4,
-        rate: Phaser.Math.FloatBetween(0.9, 1.1),
-      });
-    }
 
     let targetX = this.x;
     let targetY = this.y;

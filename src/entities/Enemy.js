@@ -1,9 +1,11 @@
 // src/entities/Enemy.js
-import Phaser from "phaser";
+import Phaser from 'phaser';
 
 export default class Enemy extends Phaser.Physics.Arcade.Sprite {
   target;
   speed = 40;
+  hp = 3;
+  isHit = false;
 
   constructor(scene, x, y, texture, frame, target) {
     super(scene, x, y, texture, frame);
@@ -24,22 +26,47 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   update() {
     if (!this.target) return;
+    if (this.isHit) return;
+
     const dist = Phaser.Math.Distance.Between(
-      this.x, this.y,
-      this.target.x, this.target.y
+      this.x,
+      this.y,
+      this.target.x,
+      this.target.y,
     );
 
     // Aggression radius
     if (dist < 200) {
-       this.scene.physics.moveToObject(this, this.target, this.speed);
-       
-       if (this.body.velocity.x < 0) {
-           this.setFlipX(true);
-       } else {
-           this.setFlipX(false);
-       }
+      this.scene.physics.moveToObject(this, this.target, this.speed);
+
+      if (this.body.velocity.x < 0) {
+        this.setFlipX(true);
+      } else {
+        this.setFlipX(false);
+      }
     } else {
-       this.setVelocity(0);
+      this.setVelocity(0);
     }
+  }
+
+  takeDamage() {
+    if (this.isHit) return false;
+
+    this.hp--;
+    this.isHit = true;
+    this.setTint(0xff0000);
+    this.setVelocity(0);
+
+    this.scene.time.delayedCall(200, () => {
+      this.clearTint();
+      this.isHit = false;
+    });
+
+    if (this.hp <= 0) {
+      this.destroy();
+      return true;
+    }
+
+    return false;
   }
 }
