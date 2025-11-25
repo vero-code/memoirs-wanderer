@@ -80,5 +80,8 @@ export default class PreloaderScene extends Phaser.Scene {
     this.load.audio('sfx_step', 'assets/audio/footstep04.ogg');
     this.load.audio('sfx_diary', 'assets/audio/cloth4.ogg');
     this.load.audio('sfx_page', 'assets/audio/bookFlip2.ogg');
+    this.load.audio('sfx_coin', 'assets/audio/handleCoins.ogg');
+    this.load.audio('sfx_mine', 'assets/audio/metalLatch.ogg');
+    this.load.audio('sfx_stone_break', 'assets/audio/metalClick.ogg');
   }
 }

@@ -411,6 +411,7 @@ export default class UIScene extends Phaser.Scene {
 
   animateCoinGain(amount) {
     this.updateUITexts();
+    this.sound.play('sfx_coin', { volume: 0.5 });
 
     this.tweens.add({
       targets: this.coinText,

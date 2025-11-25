@@ -126,7 +126,7 @@ export default class ForestScene extends Phaser.Scene {
     const enemyFrame = 122;
 
     // Enemy On
-    for (let i = 0; i < 0; i++) {
+    for (let i = 0; i < 2; i++) {
       const x = Phaser.Math.Between(100, maxX);
       const y = Phaser.Math.Between(100, bounds.height - margin);
 
@@ -141,10 +141,8 @@ export default class ForestScene extends Phaser.Scene {
     const bounds = this.physics.world.bounds;
     const margin = 10;
     const playerSafeRadius = 20;
-
     const safeZoneRight = 4 * 16;
     const maxX = bounds.width - safeZoneRight - margin;
-
     // --- BUSHES ---
     const bushCount = 15;
     const bushTiles = 'town_sheet';
@@ -234,8 +232,13 @@ export default class ForestScene extends Phaser.Scene {
         );
 
         if (isCorrectDirection) {
+          this.sound.play('sfx_mine', {
+            volume: 0.5,
+            rate: Phaser.Math.FloatBetween(0.9, 1.1),
+          });
           const destroyed = stone.hit();
           if (destroyed) {
+            this.sound.play('sfx_stone_break', { volume: 0.6 });
             this.events.emit('stone-destroyed');
 
             const currentCount = this.registry.get('hasStone') || 0;
