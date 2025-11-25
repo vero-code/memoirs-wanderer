@@ -422,6 +422,7 @@ export default class ForestScene extends Phaser.Scene {
 
   collectBag(bag) {
     bag.destroy();
+    this.sound.play('sfx_bag', { volume: 0.6 });
 
     const savedDiary = this.registry.get('bag_hasDiary');
     const savedArmor = this.registry.get('bag_hasArmor');

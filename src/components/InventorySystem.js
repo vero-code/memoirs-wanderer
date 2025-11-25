@@ -212,6 +212,7 @@ export class InventorySystem extends BaseUIComponent {
     });
 
     closeBtn.on('pointerdown', () => {
+      this.scene.sound.play('sfx_click');
       this.toggle();
     });
 

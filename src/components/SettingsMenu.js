@@ -66,7 +66,10 @@ export class SettingsMenu extends BaseUIComponent {
       )
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.toggleLanguage());
+      .on('pointerdown', () => {
+        this.scene.sound.play('sfx_click');
+        this.toggleLanguage();
+      });
 
     this.langText.on('pointerover', () => {
       this.langText.setStyle({ fill: style.fillHover });
@@ -153,6 +156,7 @@ export class SettingsMenu extends BaseUIComponent {
     });
 
     this.resetButton.on('pointerdown', () => {
+      this.scene.sound.play('sfx_click');
       const confirmed = window.confirm(
         this.getText('uiStartOverConfirm') || 'Reset game?',
       );
@@ -187,6 +191,7 @@ export class SettingsMenu extends BaseUIComponent {
     });
 
     closeBtn.on('pointerdown', () => {
+      this.scene.sound.play('sfx_click');
       this.toggle();
     });
 

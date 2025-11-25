@@ -162,6 +162,7 @@ export default class UIScene extends Phaser.Scene {
 
     // Backpack Button
     this.backpackButton = new BackpackButton(this, 690, 35, () => {
+      this.sound.play('sfx_click');
       this.inventorySystem.toggle();
       if (this.settingsMenu.getIsOpen()) {
         this.settingsMenu.toggle();
@@ -170,6 +171,7 @@ export default class UIScene extends Phaser.Scene {
 
     // Settings Button
     this.settingsButton = new SettingsButton(this, 755, 35, () => {
+      this.sound.play('sfx_click');
       this.settingsMenu.toggle();
       if (this.inventorySystem.getIsOpen()) {
         this.inventorySystem.toggle();
