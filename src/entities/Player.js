@@ -143,6 +143,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.isAttacking = true;
     this.setVelocity(0);
 
+    if (this.scene.sys.settings.key === 'ForestScene') {
+      this.scene.sound.play('sfx_attack', {
+        volume: 0.4,
+        rate: Phaser.Math.FloatBetween(0.9, 1.1),
+      });
+    }
+
     let targetX = this.x;
     let targetY = this.y;
     const lungeDist = 10;
