@@ -15,6 +15,7 @@ export default class ForestScene extends Phaser.Scene {
   ambushBushes;
   trees;
   stones;
+  objectsLayer;
   isEvening = false;
   isDay2 = false;
   isFalling = false;
@@ -59,8 +60,11 @@ export default class ForestScene extends Phaser.Scene {
     const groundLayer = map.createLayer('Terrain', tileset, 0, 0);
     if (groundLayer) groundLayer.setDepth(0);
 
-    const objectsLayer = map.createLayer('Objects', tileset, 0, 0);
-    if (objectsLayer) objectsLayer.setDepth(1);
+    this.objectsLayer = map.createLayer('Objects', tileset, 0, 0);
+    if (this.objectsLayer) {
+        this.objectsLayer.setDepth(1);
+        this.objectsLayer.setCollisionByProperty({ collides: true }); 
+    }
 
     const mapWidth = map.widthInPixels;
     const mapHeight = map.heightInPixels;
@@ -175,12 +179,15 @@ export default class ForestScene extends Phaser.Scene {
   setupCollisions() {
     this.physics.add.collider(this.player, this.trees);
     this.physics.add.collider(this.enemies, this.trees);
-
     this.physics.add.collider(this.player, this.stones, null, null, this);
     this.physics.add.collider(this.enemies, this.stones);
-
     this.physics.add.collider(this.enemies, this.enemies);
     this.physics.add.collider(this.player, this.ambushBushes);
+
+    if (this.objectsLayer) {
+        this.physics.add.collider(this.player, this.objectsLayer);
+        this.physics.add.collider(this.enemies, this.objectsLayer);
+    }
     this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
       player.takeDamage();
     });

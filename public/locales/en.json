@@ -36,8 +36,8 @@
   "uiStartOverConfirm": "Are you sure?",
   "uiCredits": "Adventurer's Voyage | v1.0",
 
-  "heroThoughts_cantLeave": "(Thoughts): I can't leave without a diary. I need to record everything.",
-  "heroThoughts_needPotato": "(Thoughts): Can't go into the forest without supplies. The Merchant had some food.",
+  "heroThoughts_cantLeave": "I can't leave without a diary. I need to record everything.",
+  "heroThoughts_needPotato": "Can't go into the forest without supplies.",
   "heroThoughts_fall": "Oh, a rock!.. AAAAAAH!!!...",
   "heroThoughts_bag": "Phew, my belongings are intact! Even my journal survived.",
   "heroThoughts_mustFindBag": "I need to find my things...",
