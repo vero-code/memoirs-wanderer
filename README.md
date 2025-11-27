@@ -1,33 +1,38 @@
 # 🌊 Adventurer's Voyage: Memoirs of a Wanderer
 
+[![itch.io](https://img.shields.io/badge/Available%20on-itch.io-fa5c5c?style=flat-square&logo=itch.io&logoColor=white)](https://vero-game.itch.io/memoirs-wanderer)
+![Phaser](https://img.shields.io/badge/Engine-Phaser%203-0095D5?style=flat-square&logo=phaser)
+![JavaScript](https://img.shields.io/badge/Language-JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+
 A narrative adventure game about memory, loss, and perseverance.
 
-**Made for [Game Off 2025](https://itch.io/jam/game-off-2025)** **Theme: WAVES**
+### 🏆 Proudly submitted to:
+* **[Game Off 2025](https://itch.io/jam/game-off-2025)** (Theme: WAVES)
+* **[Giving Tuesday 2025](https://itch.io/jam/gt2025)** — *Submit Your Game, Help a Child*
+* **[AETHRA GLOBAL GAMETHON 2025](https://aethra-global-gamethon-2025.devpost.com/)**
 
 ## 🎮 About
 
-An adventurer keeps waking up in a hospital, losing their memories and belongings with each death. Armed only with a diary, they must piece together their journey and find a way to break the cycle.
+An adventurer keeps waking up, losing their memories and belongings with each death. Armed only with a diary, they must piece together their journey and find a way to break the cycle.
 
 **Game features:**
-- ⚔️ Action-RPG combat & resource gathering
-- 🎒 Grid-based Inventory System with stacking
-- ⚙️ Settings menu with key bindings
-- 🔄 Time loop gameplay
-- 🗺️ Exploration (Forest & Town scenes)
-- 🌍 Multilingual support
+
+- ⚔️ **Action-RPG combat:** Fight enemies using hit-and-run tactics.
+- 🎒 **Inventory System:** Grid-based inventory with item stacking and tooltips.
+- 📖 **Interactive Diary:** A scrollable journal that records story progression and quests.
+- 💾 **Persistence:** Auto-save system (localStorage) — play across sessions.
+- 🔊 **Audio:** Dynamic sound effects (footsteps, interactions) and atmospheric music.
+- 🔄 **Time Loop:** "Day 2" mechanics with item recovery missions.
+- 🌍 **Multilingual support:** Full 2 language support.
+- ⚙️ **Settings**: Menu with hotkeys.
+- 🗺️ **Exploration:** Town & Forest scenes.
 
 ## 🛠️ Technologies
 
 - **Engine:** Phaser 3
 - **Language:** JavaScript (ES6+)
-- **Package Manager:** NPM
-- **Tools:** VS Code, Git, GitHub
-
-## 🎯 Theme Interpretation: WAVES
-
-1. **Monster Waves** - Enemy waves attack at night
-2. **Time Waves** - Death creates temporal loops
-3. **Memory Waves** - Emotions and memories come in waves
+- **Package Manager:** NPM (Vite)
+- **Tools:** VS Code, Git, GitHub, Tiled Level Editor
 
 ## 🚀 Development
 
