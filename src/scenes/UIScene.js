@@ -237,27 +237,27 @@ export default class UIScene extends Phaser.Scene {
     });
 
     // --- DEV MODE ---
-    this.input.keyboard.on('keydown-F2', () => {
-      this.registry.set('hasDiary', true);
-      this.registry.set('receivedDiary', true);
-      this.events.emit('get-diary');
+    // this.input.keyboard.on('keydown-F2', () => {
+    //   this.registry.set('hasDiary', true);
+    //   this.registry.set('receivedDiary', true);
+    //   this.events.emit('get-diary');
 
-      let currentPotato = this.registry.get('hasPotato');
-      if (typeof currentPotato !== 'number') currentPotato = 0;
-      this.registry.set('hasPotato', currentPotato + 1);
-      this.registry.set('receivedFreePotato', true);
-      this.events.emit('get-potato');
+    //   let currentPotato = this.registry.get('hasPotato');
+    //   if (typeof currentPotato !== 'number') currentPotato = 0;
+    //   this.registry.set('hasPotato', currentPotato + 1);
+    //   this.registry.set('receivedFreePotato', true);
+    //   this.events.emit('get-potato');
 
-      this.registry.set('isEvening', true);
-      this.handleSetTime('dusk');
+    //   this.registry.set('isEvening', true);
+    //   this.handleSetTime('dusk');
 
-      SaveManager.save(this);
-    });
+    //   SaveManager.save(this);
+    // });
 
-    this.input.keyboard.on('keydown-F4', () => {
-      this.scene.stop('GameScene');
-      this.scene.start('ForestScene');
-    });
+    // this.input.keyboard.on('keydown-F4', () => {
+    //   this.scene.stop('GameScene');
+    //   this.scene.start('ForestScene');
+    // });
   }
 
   // --- LANGUAGE ---
@@ -480,10 +480,13 @@ export default class UIScene extends Phaser.Scene {
     this.registry.set('hasStone', 0);
 
     this.registry.set('itemsLost', false);
+
     this.registry.set('hasEnteredTown', false);
+
     this.registry.set('receivedFreePotato', false);
     this.registry.set('receivedDiary', false);
     this.registry.set('hasVisitedForest', false);
+    this.registry.set('metArmorer', false);
 
     this.registry.set('bag_hasDiary', false);
     this.registry.set('bag_hasArmor', false);

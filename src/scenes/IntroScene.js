@@ -15,7 +15,7 @@ export default class IntroScene extends Phaser.Scene {
       .text(
         center.x,
         center.y - 60,
-        `${this.getText('intro_volume')}\n${this.getText('intro_day1_title')}`,
+        `${this.getText('intro_day1_title')}`,
         {
           fontFamily: 'monospace',
           fontSize: '28px',
