@@ -9,15 +9,15 @@
   "writerHello": "Writer: \"Hello! Take this diary...\"",
   "writerGoodbye": "Writer: \"Good luck! Don't forget to write.\"",
 
-  "armorerQuest": "Want some shield? I don’t have the materials to forge it. Bring me 14 stones from the Bizarre Forest.",
-  "armorerSuccess": "Whoa, that’s a lot of stones! Great work. Here, I’ve forged a Shield for you.",
-  "armorerGoodbye": "Take good care of that shield.",
+  "armorerQuest": "Armorer: Want some shield? Bring me 14 stones from the Bizarre Forest.",
+  "armorerSuccess": "Armorer: Great work. Here, I’ve forged a Shield for you.",
+  "armorerGoodbye": "Armorer: Take good care of that shield.",
 
-  "merchantHello": "Merchant: \"Fresh potatoes! Best price!\"",
+  "merchantHello": "Merchant: \"Fresh potatoes! Take one to try. \"",
   "merchantGoodbye": "Merchant: \"Come back if you get hungry.\"",
-  "merchantSell": "I'm out of potatoes, but I can sell you one for 50 coins.",
-  "merchantBought": "It's a pleasure doing business with you! Here's your potato.",
-  "merchantNoMoney": "You don’t have enough coins! Come back when you're richer.",
+  "merchantSell": "Merchant: I'm out of potatoes, but I can sell you one for 50 coins.",
+  "merchantBought": "Merchant: It's a pleasure doing business with you! Here's your potato.",
+  "merchantNoMoney": "Merchant: You don’t have enough coins! Come back when you're richer.",
 
   "uiDiary": "Diary (click to read)",
   "uiDiarySettings": "Diary",
