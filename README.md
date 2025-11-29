@@ -9,11 +9,16 @@ A narrative adventure game about memory, loss, and perseverance.
 ### 🏆 Proudly submitted to:
 * **[Game Off 2025](https://itch.io/jam/game-off-2025)** (Theme: WAVES)
 * **[Giving Tuesday 2025](https://itch.io/jam/gt2025)** — *Submit Your Game, Help a Child*
-* **[AETHRA GLOBAL GAMETHON 2025](https://aethra-global-gamethon-2025.devpost.com/)**
+* [**View Submission on AETHRA Global Gamethon**](https://devpost.com/software/adventurer-s-voyage-memoirs-of-a-wanderer)
 
 ## 🎮 About
 
 An adventurer keeps waking up, losing their memories and belongings with each death. Armed only with a diary, they must piece together their journey and find a way to break the cycle.
+
+### 📺 Gameplay Trailer
+[![Watch the Trailer](https://img.youtube.com/vi/wxFtFCDMa2M/maxresdefault.jpg)](https://youtu.be/wxFtFCDMa2M)
+
+> *Click the image above to watch the gameplay trailer.*
 
 **Game features:**
 
