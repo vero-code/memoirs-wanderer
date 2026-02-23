@@ -2,14 +2,15 @@
 
 [![itch.io](https://img.shields.io/badge/Available%20on-itch.io-fa5c5c?style=flat-square&logo=itch.io&logoColor=white)](https://vero-game.itch.io/memoirs-wanderer)
 ![Phaser](https://img.shields.io/badge/Engine-Phaser%203-0095D5?style=flat-square&logo=phaser)
-![JavaScript](https://img.shields.io/badge/Language-JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![JavaScript](https://img.shields.io/badge/Language-JavaScript-4CAF50?style=flat-square&logo=javascript&logoColor=black)
+![Winner](https://img.shields.io/badge/AETHRA%20Global%20Gamethon%202025-Winner%20🏆-gold?style=flat-square)
 
 A narrative adventure game about memory, loss, and perseverance.
 
 ### 🏆 Proudly submitted to:
 * **[Game Off 2025](https://vero-game.itch.io/memoirs-wanderer)** (Theme: WAVES)
 * **[Giving Tuesday 2025](https://vero-game.itch.io/memoirs-wanderer)** — *Submit Your Game, Help a Child*
-* [**View Submission on AETHRA Global Gamethon**](https://devpost.com/software/adventurer-s-voyage-memoirs-of-a-wanderer)
+* [**View Submission on AETHRA Global Gamethon**](https://devpost.com/software/adventurer-s-voyage-memoirs-of-a-wanderer) — 🏆 **Winner (3rd Place)**
 
 ## 🎮 About
 
